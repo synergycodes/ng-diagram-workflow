@@ -1,0 +1,123 @@
+/**
+ * Workflow Editor design tokens.
+ *
+ * Values mirror the Workflow Builder design system (packages/tokens) so the
+ * editor looks like app.workflowbuilder.io. The base ng-diagram `--ngd-*`
+ * tokens ship with the library (ng-diagram/styles.css); this file adds the
+ * workflow `--wf-*` tokens and remaps the `--ngd-*` variables that drive the
+ * on-canvas look (background, ports, edges, minimap).
+ *
+ * Theme strategy: LIGHT is the `:root` default so every token resolves even if
+ * the `data-theme` attribute is missing; `html[data-theme='dark']` overrides.
+ */
+
+:root {
+  /* Brand — identical in both themes */
+  --wf-accent: #1096e7; /* primary buttons, selection, active ports */
+  --wf-accent-hover: #0477c5;
+  --wf-text-on-accent: #ffffff;
+  --wf-focus-ring: #1096e766; /* 4px ring around a selected node */
+  --wf-ai-gradient: linear-gradient(158deg, #5360f9 8.25%, #852bec 91.09%);
+
+  /* Radius scale */
+  --wf-radius-sm: 6px;
+  --wf-radius-md: 8px;
+  --wf-radius-lg: 12px;
+
+  /* Motion */
+  --wf-duration-fast: 0.1s;
+  --wf-ease: ease-in;
+
+  /* Node geometry */
+  --wf-node-width: 258px;
+
+  /* ---- LIGHT theme (default) ---- */
+
+  /* Surfaces */
+  --wf-bg-canvas: #edeff3; /* diagram canvas + screen */
+  --wf-bg-panel: #ffffff; /* navbar, side panels, menus */
+  --wf-bg-secondary: #f5f5f7; /* hover fills, inputs */
+  --wf-bg-tertiary: #edeff3; /* branch rows, edge labels */
+
+  /* Lines */
+  --wf-stroke: #e1e3e9; /* panel outlines, dividers */
+  --wf-input-stroke: #d5d8e0; /* input borders */
+
+  /* Nodes */
+  --wf-node-bg: #ffffff;
+  --wf-node-bg-secondary: #f5f5f7; /* icon box */
+  --wf-node-stroke: #d5d8e0;
+  --wf-node-stroke-hover: #1096e7;
+  --wf-node-icon: #1096e7;
+
+  /* Text */
+  --wf-text-primary: #151516;
+  --wf-text-secondary: #4d5059;
+  --wf-text-tertiary: #6f7480;
+
+  /* Edges */
+  --wf-edge: #6f7480;
+  --wf-edge-hover: #27282b;
+  --wf-edge-selected: #1096e7;
+
+  /* Canvas */
+  --wf-canvas-dots: #b9bdc7;
+
+  /* Status */
+  --wf-danger: #d92d2d;
+
+  /* Elevation */
+  --wf-shadow: #15151614;
+  --wf-elevation-panel: 0 4px 12px var(--wf-shadow);
+  --wf-elevation-popover: 0 12px 32px var(--wf-shadow);
+}
+
+html[data-theme='dark'] {
+  --wf-bg-canvas: #151516;
+  --wf-bg-panel: #27282b;
+  --wf-bg-secondary: #383a40;
+  --wf-bg-tertiary: #151516;
+
+  --wf-stroke: #383a40;
+  --wf-input-stroke: #4d5059;
+
+  --wf-node-bg: #27282b;
+  --wf-node-bg-secondary: #151516;
+  --wf-node-stroke: #4d5059;
+  --wf-node-stroke-hover: #3ab0f6;
+  --wf-node-icon: #3ab0f6;
+
+  --wf-text-primary: #ffffff;
+  --wf-text-secondary: #d5d8e0;
+  --wf-text-tertiary: #9a9ea8;
+
+  --wf-edge: #4d5059;
+  --wf-edge-hover: #6f7480;
+  --wf-edge-selected: #3ab0f6;
+
+  --wf-canvas-dots: #383a40;
+
+  --wf-danger: #ff6b6b;
+
+  --wf-shadow: #00000066;
+}
+
+/* ng-diagram remap. `html[data-theme]` is listed so these win over the
+   library's own `html[data-theme='dark']` token block. */
+:root,
+html[data-theme] {
+  --ngd-diagram-background-color: var(--wf-bg-canvas);
+  --ngd-background-dot-color: var(--wf-canvas-dots);
+  --ngd-node-port-stroke-default: var(--wf-text-tertiary);
+  --ngd-node-port-fill-default: var(--wf-node-bg);
+  --ngd-node-port-stroke-active: var(--wf-node-bg);
+  --ngd-node-port-fill-active: var(--wf-accent);
+  --ngd-default-edge-stroke: var(--wf-edge);
+  --ngd-default-edge-stroke-hover: var(--wf-edge-hover);
+  --ngd-default-edge-stroke-selected: var(--wf-edge-selected);
+  --ngd-focus-ring-node-active: var(--wf-focus-ring);
+  --ngd-box-selection-border-color: var(--wf-accent);
+  --ngd-box-selection-background: #1096e71a;
+  --ngd-minimap-node-color: var(--wf-text-tertiary);
+  --ngd-minimap-viewport-stroke-color: var(--wf-accent);
+}

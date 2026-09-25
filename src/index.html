@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script>
+      const stored = localStorage.getItem('theme');
+      const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light';
+      document.documentElement.dataset.theme = stored || preferred;
+    </script>
+    <title>Angular Workflow Editor - Live Demo | ngDiagram</title>
+    <meta
+      name="description"
+      content="Design automation workflows in the browser: drag triggers, actions, delays, decisions, notifications and AI agents from a palette, connect them and edit their properties. An open-source Angular starter built on ngDiagram."
+    />
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

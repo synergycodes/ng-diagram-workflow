@@ -1,0 +1,43 @@
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { provideNgDiagram } from 'ng-diagram';
+import { ContextMenuComponent } from '../context-menu/context-menu.component';
+import { ContextMenuService } from '../context-menu/context-menu.service';
+import { DiagramComponent } from '../diagram/diagram.component';
+import { EditorActionsService } from '../diagram/editor-actions.service';
+import { ExportService } from '../export/export.service';
+import { MinimapBarComponent } from '../minimap-bar/minimap-bar.component';
+import { PaletteSidebarComponent } from '../palette-sidebar/palette-sidebar.component';
+import { PropertiesSidebarComponent } from '../properties-sidebar/properties-sidebar.component';
+import { PropertiesSidebarService } from '../properties-sidebar/properties-sidebar.service';
+import { TopNavbarComponent } from '../top-navbar/top-navbar.component';
+
+/**
+ * Top-level workflow editor screen: a full-bleed diagram canvas with the
+ * navbar, nodes library, properties panel, zoom/minimap bar and context menu
+ * overlaid on top.
+ */
+@Component({
+  selector: 'app-workflow-editor-page',
+  imports: [
+    DiagramComponent,
+    PaletteSidebarComponent,
+    PropertiesSidebarComponent,
+    TopNavbarComponent,
+    MinimapBarComponent,
+    ContextMenuComponent,
+  ],
+  templateUrl: './workflow-editor-page.component.html',
+  styleUrl: './workflow-editor-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.props-expanded]': 'propsExpanded()' },
+  providers: [
+    provideNgDiagram(),
+    PropertiesSidebarService,
+    EditorActionsService,
+    ExportService,
+    ContextMenuService,
+  ],
+})
+export class WorkflowEditorPageComponent {
+  protected readonly propsExpanded = inject(PropertiesSidebarService).isExpanded;
+}

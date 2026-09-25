@@ -1,0 +1,8 @@
+@use '../shared/node-card';
+
+/* Push each branch port from its row's right edge out to the card border:
+   section padding (0.625rem) + section border (1px) + card padding (0.5rem)
+   + card border (1px) + row border (1px). */
+.branch-port {
+  left: calc(100% + 1.125rem + 3px);
+}

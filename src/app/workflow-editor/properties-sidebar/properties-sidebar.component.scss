@@ -1,0 +1,126 @@
+:host {
+  display: block;
+  /* The host spans the full height; let clicks pass through to the diagram,
+     only the visible panel below captures pointer events. */
+  pointer-events: none;
+}
+
+.sidebar {
+  display: flex;
+  width: 320px;
+  height: 100%;
+  flex-direction: column;
+  pointer-events: auto;
+  border: 1px solid var(--wf-stroke);
+  border-radius: 12px;
+  background: var(--wf-bg-panel);
+  box-shadow: var(--wf-elevation-panel);
+  overflow: hidden;
+}
+
+/* Collapsed: a compact box around the toggle, not a full-height rail. */
+:host(:not(.expanded)) .sidebar {
+  width: auto;
+  height: auto;
+}
+
+:host(:not(.expanded)) .header {
+  padding: 8px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+}
+
+.title {
+  color: var(--wf-text-primary);
+}
+
+.selection-id {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.id-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.id-text .ref {
+  color: var(--wf-text-primary);
+}
+
+.id-text .type {
+  color: var(--wf-text-secondary);
+}
+
+.panel-toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--wf-text-secondary);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--wf-bg-secondary);
+    color: var(--wf-text-primary);
+  }
+}
+
+.separator {
+  height: 1px;
+  background: var(--wf-stroke);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background-color: currentColor;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.icon-panel {
+  mask-image: url('../../../assets/sidebar.svg');
+  -webkit-mask-image: url('../../../assets/sidebar.svg');
+}
+
+.id-icon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--wf-node-stroke);
+  border-radius: var(--wf-radius-md);
+  background: var(--wf-node-bg-secondary);
+  color: var(--wf-node-icon);
+  font-size: 1.25rem;
+}

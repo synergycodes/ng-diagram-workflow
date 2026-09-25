@@ -1,0 +1,121 @@
+/* Native control styles shared by the node and edge property forms. */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.group-title {
+  margin: 0;
+  color: var(--wf-text-secondary);
+}
+
+.field {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--wf-input-stroke);
+  border-radius: var(--wf-radius-md);
+  background: var(--wf-bg-panel);
+  color: var(--wf-text-primary);
+  transition: border-color var(--wf-duration-fast) var(--wf-ease);
+
+  &::placeholder {
+    color: var(--wf-text-tertiary);
+  }
+
+  &:hover,
+  &:focus {
+    border-color: var(--wf-accent);
+  }
+}
+
+.textarea {
+  min-height: 96px;
+  max-height: 200px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+/* Checkbox styled as a toggle switch. */
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--wf-text-secondary);
+  cursor: pointer;
+}
+
+.switch {
+  position: relative;
+  flex: none;
+  width: 32px;
+  height: 18px;
+  margin: 0;
+  appearance: none;
+  border-radius: 999px;
+  background: var(--wf-input-stroke);
+  cursor: pointer;
+  transition: background-color var(--wf-duration-fast) var(--wf-ease);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: transform var(--wf-duration-fast) var(--wf-ease);
+  }
+
+  &:checked {
+    background: var(--wf-accent);
+
+    &::after {
+      transform: translateX(14px);
+    }
+  }
+}
+
+.ghost-button {
+  display: inline-flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px dashed var(--wf-input-stroke);
+  border-radius: var(--wf-radius-md);
+  background: transparent;
+  color: var(--wf-text-secondary);
+  cursor: pointer;
+  transition:
+    border-color var(--wf-duration-fast) var(--wf-ease),
+    color var(--wf-duration-fast) var(--wf-ease);
+
+  &:hover {
+    border-color: var(--wf-accent);
+    color: var(--wf-accent);
+  }
+}
+
+.icon-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--wf-radius-sm);
+  background: transparent;
+  color: var(--wf-text-tertiary);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--wf-bg-secondary);
+    color: var(--wf-danger);
+  }
+}

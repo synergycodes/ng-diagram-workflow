@@ -1,0 +1,120 @@
+import { inject, Injectable } from '@angular/core';
+import { toJpeg } from 'html-to-image';
+import { NgDiagramModelService, NgDiagramViewportService, type Point } from 'ng-diagram';
+import { isLabelEdge, isWorkflowNode } from '../diagram/model/guards';
+import type { DecisionBranch, PropertyValue } from '../diagram/model/workflow-types';
+import { ProjectNameService } from '../top-navbar/project-name.service';
+
+/** Serialized workflow: its steps plus the connections between their ports. */
+interface WorkflowDocument {
+  format: 'ng-diagram-workflow';
+  version: 1;
+  name: string;
+  generatedAt: string;
+  nodes: {
+    id: string;
+    kind: string;
+    position: Point;
+    label: string;
+    description: string;
+    properties: Record<string, PropertyValue>;
+    branches?: DecisionBranch[];
+  }[];
+  connections: {
+    id: string;
+    source: string;
+    sourcePort?: string;
+    target: string;
+    targetPort?: string;
+    label?: string;
+  }[];
+}
+
+/** Downloads the current workflow as JSON (the model) or JPEG (a raster of the canvas). */
+@Injectable()
+export class ExportService {
+  private readonly modelService = inject(NgDiagramModelService);
+  private readonly viewport = inject(NgDiagramViewportService);
+  private readonly projectName = inject(ProjectNameService);
+
+  exportJson(): void {
+    const doc = this.buildDocument();
+    const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json' });
+    this.download(blob, `${this.projectName.fileName()}.json`);
+  }
+
+  async exportJpeg(): Promise<void> {
+    const element = document.querySelector<HTMLElement>('ng-diagram');
+    if (!element) return;
+
+    // Fit the whole workflow into view, then give the browser a couple of
+    // frames to paint the fitted transform before the DOM is cloned.
+    await this.viewport.zoomToFit({ padding: [40, 40, 40, 40] });
+    await nextFrame();
+
+    const background = readVar('--wf-bg-canvas') || '#edeff3';
+    const dataUrl = await toJpeg(element, {
+      quality: 0.95,
+      pixelRatio: 2,
+      backgroundColor: background,
+      // The page already loads Poppins, so skip inlining the cross-origin
+      // Google Fonts stylesheet (which throws CORS errors and isn't needed).
+      skipFonts: true,
+      filter: (node) => !(node instanceof HTMLElement && node.dataset['exportIgnore'] === 'true'),
+    });
+
+    const blob = await (await fetch(dataUrl)).blob();
+    this.download(blob, `${this.projectName.fileName()}.jpeg`);
+  }
+
+  private buildDocument(): WorkflowDocument {
+    return {
+      format: 'ng-diagram-workflow',
+      version: 1,
+      name: this.projectName.name(),
+      generatedAt: new Date().toISOString(),
+      nodes: this.modelService
+        .nodes()
+        .filter(isWorkflowNode)
+        .map(({ id, position, data }) => ({
+          id,
+          kind: data.kind,
+          position,
+          label: data.label,
+          description: data.description,
+          properties: data.properties,
+          ...(data.branches ? { branches: data.branches } : {}),
+        })),
+      connections: this.modelService
+        .edges()
+        .filter(isLabelEdge)
+        .map(({ id, source, sourcePort, target, targetPort, data }) => ({
+          id,
+          source,
+          sourcePort,
+          target,
+          targetPort,
+          ...(data.label ? { label: data.label } : {}),
+        })),
+    };
+  }
+
+  private download(blob: Blob, filename: string): void {
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+}
+
+function readVar(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function nextFrame(): Promise<void> {
+  return new Promise((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
+}

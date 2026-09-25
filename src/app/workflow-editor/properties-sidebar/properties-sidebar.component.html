@@ -1,0 +1,56 @@
+<aside class="sidebar" aria-labelledby="properties-sidebar-title">
+  <header class="header">
+    @if (isExpanded()) {
+      @if (node(); as n) {
+        <div class="selection-id">
+          <div class="id-icon"><app-node-icon [icon]="def()?.icon ?? ''" /></div>
+          <div class="id-text">
+            <span id="properties-sidebar-title" class="h9 ref">{{ n.data.label }}</span>
+            <span class="p11 type">{{ def()?.label }}</span>
+          </div>
+        </div>
+      } @else {
+        <span id="properties-sidebar-title" class="h7 title">Properties</span>
+      }
+    }
+    <button
+      class="panel-toggle"
+      type="button"
+      (click)="onToggle()"
+      [attr.aria-expanded]="isExpanded()"
+      aria-label="Toggle properties panel"
+    >
+      <span class="icon icon-panel"></span>
+    </button>
+  </header>
+
+  @if (isExpanded()) {
+    <div class="separator"></div>
+    <div class="content">
+      @switch (state()) {
+        @case ('node') {
+          @if (node(); as n) {
+            <app-node-properties [node]="n" />
+          }
+        }
+        @case ('edge') {
+          @if (edge(); as e) {
+            <app-edge-properties [edge]="e" />
+          }
+        }
+        @case ('empty') {
+          <app-sidebar-placeholder
+            title="No selection"
+            description="Select a node or connection on the canvas to view and edit its properties."
+          />
+        }
+        @default {
+          <app-sidebar-placeholder
+            title="Multiple elements selected"
+            description="Select a single node or connection to edit its properties."
+          />
+        }
+      }
+    </div>
+  }
+</aside>

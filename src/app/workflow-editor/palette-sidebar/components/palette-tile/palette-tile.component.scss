@@ -1,0 +1,29 @@
+:host {
+  display: block;
+}
+
+ng-diagram-palette-item {
+  display: block;
+  cursor: grab;
+}
+
+ng-diagram-palette-item:active {
+  cursor: grabbing;
+}
+
+/* Same chrome as a node card on the canvas. */
+.tile {
+  padding: 0.5rem;
+  border: 1px solid var(--wf-node-stroke);
+  border-radius: var(--wf-radius-lg);
+  background: var(--wf-node-bg);
+  transition: border-color var(--wf-duration-fast) var(--wf-ease);
+}
+
+ng-diagram-palette-item:hover .tile {
+  border-color: var(--wf-node-stroke-hover);
+}
+
+.preview {
+  width: var(--wf-node-width);
+}

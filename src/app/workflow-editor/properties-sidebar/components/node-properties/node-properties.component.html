@@ -1,0 +1,102 @@
+<section class="group">
+  <h3 class="h10 group-title">General Information</h3>
+  <app-form-field label="Title" fieldId="prop-label">
+    <input
+      id="prop-label"
+      class="field p10"
+      type="text"
+      placeholder="Node Title..."
+      [formField]="form.label"
+    />
+  </app-form-field>
+  <app-form-field label="Description" fieldId="prop-description">
+    <input
+      id="prop-description"
+      class="field p10"
+      type="text"
+      placeholder="Type your description here..."
+      [formField]="form.description"
+    />
+  </app-form-field>
+</section>
+
+@if (visibleFields().length > 0) {
+  <section class="group">
+    <h3 class="h10 group-title">{{ def().label }} Settings</h3>
+    @for (field of visibleFields(); track field.key) {
+      @let id = 'prop-' + field.key;
+      @switch (field.kind) {
+        @case ('text') {
+          <app-form-field [label]="field.label" [fieldId]="id">
+            <input
+              class="field p10"
+              type="text"
+              [id]="id"
+              [placeholder]="field.placeholder ?? ''"
+              [formField]="textField(field.key)"
+            />
+          </app-form-field>
+        }
+        @case ('textarea') {
+          <app-form-field [label]="field.label" [fieldId]="id">
+            <textarea
+              class="field textarea p10"
+              [id]="id"
+              [placeholder]="field.placeholder ?? ''"
+              [formField]="textField(field.key)"
+            ></textarea>
+          </app-form-field>
+        }
+        @case ('select') {
+          <app-form-field [label]="field.label" [fieldId]="id">
+            <app-icon-select
+              [controlId]="id"
+              [options]="field.options"
+              [placeholder]="field.placeholder ?? 'Select…'"
+              [formField]="textField(field.key)"
+            />
+          </app-form-field>
+        }
+        @case ('switch') {
+          <label class="switch-row p10" [for]="id">
+            {{ field.label }}
+            <input class="switch" type="checkbox" [id]="id" [formField]="switchField(field.key)" />
+          </label>
+        }
+      }
+    }
+  </section>
+}
+
+@if (isDecision()) {
+  <section class="group">
+    <h3 class="h10 group-title">Branches</h3>
+    @for (branch of model().branches ?? []; track branch.id; let i = $index) {
+      <div class="branch">
+        <input
+          class="field p10"
+          type="text"
+          placeholder="Branch title"
+          [attr.aria-label]="'Branch ' + (i + 1) + ' title'"
+          [formField]="branchLabel(i)"
+        />
+        <button
+          class="icon-button"
+          type="button"
+          [attr.aria-label]="'Remove branch ' + (i + 1)"
+          (click)="removeBranch(branch.id)"
+        >
+          <i class="ph ph-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+    <button class="ghost-button p10" type="button" (click)="addBranch()">
+      <i class="ph ph-plus-circle" aria-hidden="true"></i>
+      Add branch
+    </button>
+  </section>
+}
+
+<div class="actions">
+  <button class="remove-button p10" type="button" (click)="remove()">Delete node</button>
+</div>

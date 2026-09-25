@@ -1,0 +1,43 @@
+/* Custom-template edges don't get the library's .default-edge class, so the
+   stroke states are driven here through --edge-stroke. */
+ng-diagram-base-edge.label-edge {
+  --edge-stroke: var(--wf-edge);
+  --edge-stroke-width: 2;
+  --edge-stroke-transition: stroke var(--wf-duration-fast) var(--wf-ease);
+}
+
+ng-diagram-base-edge.label-edge:hover:not(.selected):not(.temporary) {
+  --edge-stroke: var(--wf-edge-hover);
+}
+
+ng-diagram-base-edge.label-edge.selected,
+ng-diagram-base-edge.label-edge.temporary {
+  --edge-stroke: var(--wf-edge-selected);
+}
+
+ng-diagram-base-edge.label-edge.selected {
+  --edge-stroke-width: 3;
+}
+
+.label {
+  display: inline-block;
+  max-width: 160px;
+  padding: 0.25rem 0.75rem;
+  overflow: hidden;
+  border: 2px solid var(--wf-edge);
+  border-radius: var(--wf-radius-sm);
+  background: var(--wf-bg-tertiary);
+  color: var(--wf-text-primary);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: border-color var(--wf-duration-fast) var(--wf-ease);
+
+  &.selected {
+    border-color: var(--wf-edge-selected);
+    border-width: 3px;
+  }
+}
+
+ng-diagram-base-edge.label-edge:hover .label:not(.selected) {
+  border-color: var(--wf-edge-hover);
+}

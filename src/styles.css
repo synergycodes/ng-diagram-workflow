@@ -1,0 +1,78 @@
+@import './typography.css';
+@import 'ng-diagram/styles.css';
+@import '@phosphor-icons/web/regular/style.css';
+@import './workflow-theme.css';
+
+html {
+  background-color: var(--wf-bg-canvas);
+}
+
+html,
+body {
+  height: 100%;
+  font-family:
+    'Poppins',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  color: var(--wf-text-primary);
+  margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Keyboard focus: one token-backed ring for every interactive element, and no
+   ring on pointer focus. Components must not set bare `outline: none`. */
+:focus-visible {
+  outline: 2px solid var(--wf-accent);
+  outline-offset: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Respect reduced-motion: neutralize transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+/* Mask-based icon for the few custom SVGs (Phosphor covers the rest via
+   `ph ph-*` classes). Set `--icon-url` and size on the element. */
+.mask-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  background-color: currentColor;
+  mask: var(--icon-url) center / contain no-repeat;
+  -webkit-mask: var(--icon-url) center / contain no-repeat;
+}

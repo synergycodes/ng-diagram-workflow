@@ -1,0 +1,40 @@
+<aside class="library" [class.collapsed]="!isExpanded()" aria-label="Nodes library">
+  <header class="library-header">
+    @if (isExpanded()) {
+      <span class="h7 library-title">Nodes Library</span>
+    }
+    <button
+      class="nav-button"
+      type="button"
+      (click)="togglePanel()"
+      [attr.aria-expanded]="isExpanded()"
+      aria-label="Toggle nodes library"
+    >
+      <span class="icon icon-panel"></span>
+    </button>
+  </header>
+
+  @if (isExpanded()) {
+    <div class="search-row">
+      <div class="search-input">
+        <span class="icon icon-search"></span>
+        <input
+          class="search-field p10"
+          type="text"
+          placeholder="Search nodes"
+          [value]="search()"
+          (input)="onSearch($event)"
+          aria-label="Search nodes"
+        />
+      </div>
+    </div>
+
+    <div class="tiles">
+      @for (kind of kinds(); track kind) {
+        <app-palette-tile [kind]="kind" />
+      } @empty {
+        <p class="empty p10">No nodes match “{{ search() }}”.</p>
+      }
+    </div>
+  }
+</aside>

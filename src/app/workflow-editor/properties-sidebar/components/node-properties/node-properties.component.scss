@@ -1,0 +1,35 @@
+@use '../../form-controls';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.branch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.actions {
+  display: flex;
+}
+
+.remove-button {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--wf-stroke);
+  border-radius: var(--wf-radius-md);
+  background: transparent;
+  color: var(--wf-text-secondary);
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    color 0.12s ease;
+
+  &:hover {
+    border-color: var(--wf-danger);
+    color: var(--wf-danger);
+  }
+}

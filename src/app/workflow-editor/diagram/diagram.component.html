@@ -1,0 +1,13 @@
+<div class="diagram" (contextmenu)="onBackgroundContextMenu($event)">
+  <ng-diagram
+    [model]="model"
+    [config]="diagramConfig"
+    [nodeTemplateMap]="nodeTemplateMap"
+    [edgeTemplateMap]="edgeTemplateMap"
+    (diagramInit)="onDiagramInit()"
+    (paletteItemDropped)="onPaletteItemDropped($event)"
+    (selectionGestureEnded)="onSelectionGestureEnded($event)"
+  >
+    <ng-diagram-background type="dots" />
+  </ng-diagram>
+</div>

@@ -1,0 +1,88 @@
+:host {
+  display: block;
+}
+
+.top-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--wf-bg-panel);
+  border: 1px solid var(--wf-stroke);
+  border-radius: 14px;
+  padding: 8px 12px 8px 16px;
+  box-shadow: var(--wf-elevation-popover);
+}
+
+.left-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.menu-trigger {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  img {
+    height: 24px;
+    width: auto;
+    display: block;
+  }
+}
+
+.divider {
+  width: 1px;
+  height: 22px;
+  background: var(--wf-stroke);
+}
+
+.app-name {
+  color: var(--wf-text-primary);
+  white-space: nowrap;
+}
+
+/* Editable project name: plain text that reveals a subtle field on hover and
+   swaps to a real input on click. */
+.project-name {
+  max-width: 240px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--wf-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+
+  &:hover {
+    background: var(--wf-bg-secondary);
+  }
+
+  &:focus-visible {
+    border-color: var(--wf-accent);
+  }
+}
+
+.project-name-input {
+  width: 240px;
+  padding: 4px 8px;
+  border: 1px solid var(--wf-accent);
+  border-radius: var(--wf-radius-sm);
+  background: var(--wf-bg-secondary);
+  color: var(--wf-text-primary);
+}
+
+.right-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
