@@ -32,6 +32,28 @@
   border-color: var(--wf-node-stroke-hover);
 }
 
+/* Live run status reported by the backend (see NodeRunStatusDirective). */
+:host([data-run-status]) .card {
+  border-color: var(--run-status-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--run-status-color) 25%, transparent);
+}
+
+:host([data-run-status='running']) {
+  --run-status-color: var(--wf-status-running);
+}
+
+:host([data-run-status='waiting']) {
+  --run-status-color: var(--wf-status-waiting);
+}
+
+:host([data-run-status='succeeded']) {
+  --run-status-color: var(--wf-status-succeeded);
+}
+
+:host([data-run-status='failed']) {
+  --run-status-color: var(--wf-status-failed);
+}
+
 /* Invisible strip level with the header; its left/right ports sit on the card
    border, vertically centred on the icon box (header = 0.5rem pad + 46px box). */
 .header-ports {

@@ -4,6 +4,9 @@ import { ContextMenuComponent } from '../context-menu/context-menu.component';
 import { ContextMenuService } from '../context-menu/context-menu.service';
 import { DiagramComponent } from '../diagram/diagram.component';
 import { EditorActionsService } from '../diagram/editor-actions.service';
+import { WorkflowBackend } from '../execution/execution-types';
+import { ExecutionService } from '../execution/execution.service';
+import { MockWorkflowBackend } from '../execution/mock-backend';
 import { ExportService } from '../export/export.service';
 import { MinimapBarComponent } from '../minimap-bar/minimap-bar.component';
 import { PaletteDragService } from '../palette-sidebar/palette-drag.service';
@@ -42,6 +45,9 @@ import { TopNavbarComponent } from '../top-navbar/top-navbar.component';
     ContextMenuService,
     PaletteDragService,
     TemplateSelectorService,
+    ExecutionService,
+    // Swap in a real backend client here; the canvas only sees `RunEvent`s.
+    { provide: WorkflowBackend, useClass: MockWorkflowBackend },
   ],
 })
 export class WorkflowEditorPageComponent {

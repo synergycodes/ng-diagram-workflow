@@ -9,11 +9,12 @@ import {
 } from '@angular/core';
 import { ExportMenuComponent } from '../export/export-menu.component';
 import { ProjectNameService } from './project-name.service';
+import { RunControlComponent } from './run-control.component';
 import { ThemeToggleComponent } from './theme-toggle.component';
 
 @Component({
   selector: 'app-top-navbar',
-  imports: [ThemeToggleComponent, ExportMenuComponent],
+  imports: [ThemeToggleComponent, ExportMenuComponent, RunControlComponent],
   templateUrl: './top-navbar.component.html',
   styleUrl: './top-navbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

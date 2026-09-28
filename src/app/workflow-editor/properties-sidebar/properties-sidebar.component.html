@@ -26,7 +26,8 @@
 
   @if (isExpanded()) {
     <div class="separator"></div>
-    <div class="content">
+    <!-- Read-only while a run is in progress (the run-lock middleware rejects edits). -->
+    <fieldset class="content" [disabled]="isRunning()">
       @if (node(); as n) {
         <app-node-properties [node]="n" />
       } @else if (edge(); as e) {
@@ -42,6 +43,6 @@
           description="Select a single node or connection to edit its properties."
         />
       }
-    </div>
+    </fieldset>
   }
 </aside>

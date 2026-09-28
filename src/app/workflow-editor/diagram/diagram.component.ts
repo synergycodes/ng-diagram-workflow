@@ -16,12 +16,14 @@ import {
   type SelectionGestureEndedEvent,
 } from 'ng-diagram';
 import { ContextMenuService } from '../context-menu/context-menu.service';
+import { ExecutionService } from '../execution/execution.service';
 import { PaletteDragService } from '../palette-sidebar/palette-drag.service';
 import { PropertiesSidebarService } from '../properties-sidebar/properties-sidebar.service';
 import { ProjectNameService } from '../top-navbar/project-name.service';
 import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 import { LabelEdgeComponent } from './edges/label-edge/label-edge.component';
 import { cycleExitMiddleware } from './middlewares/cycle-exit.middleware';
+import { createRunLockMiddleware } from './middlewares/run-lock.middleware';
 import { isStartNode } from './model/guards';
 import { LABEL_EDGE_TYPE } from './model/workflow-types';
 import { NODE_TEMPLATE_COMPONENTS } from './nodes/node-templates';
@@ -48,6 +50,7 @@ export class DiagramComponent {
   private readonly sidebarService = inject(PropertiesSidebarService);
   private readonly contextMenu = inject(ContextMenuService);
   private readonly paletteDrag = inject(PaletteDragService);
+  private readonly execution = inject(ExecutionService);
 
   private readonly grid = { width: this.config.gridSize, height: this.config.gridSize };
 
@@ -91,7 +94,11 @@ export class DiagramComponent {
   } satisfies NgDiagramConfig;
 
   // Graph-level rules run as middleware on every model change.
-  middlewares = createMiddlewares((defaults) => [...defaults, cycleExitMiddleware]);
+  middlewares = createMiddlewares((defaults) => [
+    ...defaults,
+    cycleExitMiddleware,
+    createRunLockMiddleware(() => this.execution.isRunning()),
+  ]);
 
   nodeTemplateMap = new NgDiagramNodeTemplateMap(Object.entries(NODE_TEMPLATE_COMPONENTS));
   edgeTemplateMap = new NgDiagramEdgeTemplateMap([[LABEL_EDGE_TYPE, LabelEdgeComponent]]);

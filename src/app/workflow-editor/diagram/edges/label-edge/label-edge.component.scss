@@ -27,6 +27,13 @@ ng-diagram-base-edge.label-edge.temporary {
   --edge-stroke: var(--wf-edge-selected);
 }
 
+/* The flow of the current run went along this connection. */
+ng-diagram-base-edge.label-edge.traversed {
+  --edge-stroke: var(--wf-status-running);
+  --edge-stroke-width: 3;
+  --edge-label-border-color: var(--wf-status-running);
+}
+
 ng-diagram-base-edge.label-edge.selected {
   --edge-stroke-width: 3;
   --edge-label-border-width: 3px;

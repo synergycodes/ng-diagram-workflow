@@ -1,4 +1,5 @@
 <div class="card" ngDiagramNodeSelected [node]="node()">
+  <app-node-status [state]="runState()" />
   <app-node-header
     [variant]="def().variant"
     [icon]="def().icon"

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import {
   NgDiagramNodeSelectedDirective,
   NgDiagramPortComponent,
@@ -9,6 +9,8 @@ import { NODE_CATALOG, selectedOption } from '../../model/node-catalog';
 import { PORT_IN, PORT_OUT, type WorkflowNodeData } from '../../model/workflow-types';
 import { NodeContextMenuDirective } from '../shared/node-context-menu.directive';
 import { NodeHeaderComponent } from '../shared/node-header.component';
+import { NodeRunStatusDirective } from '../shared/node-run-status.directive';
+import { NodeStatusComponent } from '../shared/node-status.component';
 import { NodeIconComponent } from '../shared/node-icon.component';
 
 /**
@@ -22,16 +24,22 @@ import { NodeIconComponent } from '../shared/node-icon.component';
     NgDiagramNodeSelectedDirective,
     NgDiagramPortComponent,
     NodeHeaderComponent,
+    NodeStatusComponent,
     NodeIconComponent,
   ],
   templateUrl: './workflow-node.component.html',
   styleUrl: './workflow-node.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [{ directive: NodeContextMenuDirective, inputs: ['node'] }],
+  hostDirectives: [
+    { directive: NodeContextMenuDirective, inputs: ['node'] },
+    { directive: NodeRunStatusDirective, inputs: ['node'] },
+  ],
   host: { class: 'ng-diagram-port-hoverable-over-node' },
 })
 export class WorkflowNodeComponent implements NgDiagramNodeTemplate<WorkflowNodeData> {
   readonly node = input.required<Node<WorkflowNodeData>>();
+
+  protected readonly runState = inject(NodeRunStatusDirective).state;
 
   protected readonly portIn = PORT_IN;
   protected readonly portOut = PORT_OUT;

@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { NgDiagramModelService, NgDiagramService, NgDiagramViewportService } from 'ng-diagram';
 import type { WorkflowTemplate } from '../diagram/templates';
+import { ExecutionService } from '../execution/execution.service';
 import { ProjectNameService } from '../top-navbar/project-name.service';
 import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 
@@ -15,6 +16,7 @@ export class TemplateSelectorService {
   private readonly viewport = inject(NgDiagramViewportService);
   private readonly projectName = inject(ProjectNameService);
   private readonly config = inject(WORKFLOW_EDITOR_CONFIG);
+  private readonly execution = inject(ExecutionService);
 
   readonly isOpen = signal(false);
 
@@ -29,6 +31,7 @@ export class TemplateSelectorService {
   /** Replace the whole workflow with `template`, or clear it for `null` (Empty Canvas). */
   async load(template: WorkflowTemplate | null): Promise<void> {
     this.close();
+    this.execution.reset();
     const { nodes, edges } = structuredClone(template?.model ?? { nodes: [], edges: [] });
     await this.diagram.transaction(
       async () => {

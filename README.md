@@ -15,6 +15,7 @@ Features:
 - **Properties panel** built with Angular **Signal Forms** — fields come from the catalog, can be shown or hidden depending on other values, and changes appear on the node card as you type
 - Labelled connections drawn as orthogonal edges with rounded corners; invalid connections are rejected (no self-loops, nothing can connect into a Trigger)
 - Graph rules in a **middleware**: a loop may only be drawn if a Decision or Approval can end it (reflection loops yes, endless agent ping-pong no)
+- **Run** a workflow on a **mocked backend**: each step's live status (running, waiting for approval, done, failed) and the path the flow took show on the canvas; Approval steps wait until someone picks Approved / Rejected on the node, and the canvas is locked by a second middleware while a run is in progress
 - Right-click **context menus** — copy / cut / paste / delete on a node, paste on the background
 - **Export** as JSON (nodes and connections) or as a JPEG snapshot of the canvas
 - Minimap and zoom controls; nodes snap to an 18px grid
@@ -73,6 +74,7 @@ Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads:
 | Edge template + label | `NgDiagramEdgeTemplateMap`, `NgDiagramBaseEdgeComponent`, `NgDiagramBaseEdgeLabelComponent` | `diagram/edges/label-edge/`                           |
 | Connection rules      | `linking.validateConnection`, `finalEdgeDataBuilder`                                        | `diagram/diagram.component.ts`                        |
 | Graph rules           | `Middleware`, `createMiddlewares`, `[middlewares]` input                                    | `diagram/middlewares/`, `diagram/model/cycles.ts`     |
+| Live run status       | node / edge templates reading signals fed by a `WorkflowBackend` event stream               | `execution/`, `diagram/nodes/shared/node-status.*`    |
 | Routing, snapping     | `edgeRouting.orthogonal`, `snapping`, `background`                                          | `diagram/diagram.component.ts`                        |
 | Palette               | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                     | `palette-sidebar/components/palette-tile/`            |
 | Model updates         | `NgDiagramModelService.updateNodeData / updateEdgeData / deleteEdges`                       | `properties-sidebar/properties-sidebar.service.ts`    |
@@ -99,13 +101,14 @@ src/
     │   ├── middlewares/              # graph rules run on every model change
     │   ├── nodes/                    # workflow, decision, ai-agent templates + shared header/icon
     │   └── edges/label-edge/         # labelled edge template
+    ├── execution/                    # WorkflowBackend contract, mock backend, run state (+ spec)
     ├── palette-sidebar/              # Nodes Library + draggable tiles
     ├── template-selector/            # "Select a template" dialog, swaps the model in place
     ├── properties-sidebar/           # panel, Signal Forms for nodes / edges, icon select control
     ├── minimap-bar/                  # zoom stepper + minimap popover
     ├── context-menu/                 # node / background right-click menu
     ├── export/                       # JSON + JPEG export, navbar dropdown
-    └── top-navbar/                   # logo, editable workflow name, export, theme toggle
+    └── top-navbar/                   # logo, editable workflow name, run, export, theme toggle
 ```
 
 The ng-diagram `node.type` selects the **template**, which controls the node's layout. `node.data.kind` says **what the node is**. This split lets Trigger, Action, Delay, Notification and Merge share one card template, Decision and Approval share the branching template, and AI Agent gets its own.
@@ -145,6 +148,20 @@ few `--ngd-*` variables that drive the on-canvas look.
   or override the `WORKFLOW_EDITOR_CONFIG` token in the page providers.
 - **Theme:** adjust the `--wf-*` tokens in `workflow-theme.css`.
 
+## Execution
+
+**Run** (navbar) sends the same `ng-diagram-workflow` document the JSON export
+produces to a `WorkflowBackend` and folds the `RunEvent`s it streams back
+(`node` status, `edge` travelled, `finished`) into signals the node and edge
+templates read. The page provides
+[`MockWorkflowBackend`](src/app/workflow-editor/execution/mock-backend.ts),
+which walks the graph with timers: parallel branches run at once, a Merge
+waits for all branches or the first one, a Decision loops back once and then
+goes forward, an Approval waits for a click on one of its branches, and
+**Simulate failure** fails a step (an Action with **Retry on failure** fails
+once, then succeeds). To connect a real engine, provide another
+`WorkflowBackend` in `workflow-editor-page.component.ts`.
+
 ## Export format
 
 [`export.service.ts`](src/app/workflow-editor/export/export.service.ts) offers
@@ -161,7 +178,7 @@ This template is a demo of the editor UI, not a workflow engine. It does not inc
 - persistence or import
 - workflow validation beyond connection rules and loop exits
 - auto-layout
-- workflow execution
+- real workflow execution — runs are simulated in the browser by `MockWorkflowBackend`
 
 ## Workflow Builder
 
