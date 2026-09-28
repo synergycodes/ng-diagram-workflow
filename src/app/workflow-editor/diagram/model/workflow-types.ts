@@ -12,7 +12,7 @@ export const LABEL_EDGE_TYPE = 'label-edge';
 export type WorkflowNodeTemplate =
   typeof WORKFLOW_NODE_TYPE | typeof DECISION_NODE_TYPE | typeof AI_AGENT_NODE_TYPE;
 
-/** Every node kind offered by the palette (mirrors the Workflow Builder demo). */
+/** Every node kind offered by the palette. */
 export enum WorkflowNodeKind {
   Trigger = 'trigger',
   Action = 'action',
@@ -20,6 +20,8 @@ export enum WorkflowNodeKind {
   Decision = 'decision',
   Notification = 'notification',
   AiAgent = 'ai-agent',
+  Approval = 'approval',
+  Merge = 'merge',
 }
 
 /** Look of the node header icon box; `ai` draws it on the AI gradient. */
@@ -40,7 +42,7 @@ export interface WorkflowNodeData {
   description: string;
   /** Kind-specific settings, keyed by the catalog field `key`. */
   properties: Record<string, PropertyValue>;
-  /** Decision nodes only: one outgoing port per branch. */
+  /** Branching nodes (Decision, Approval) only: one outgoing port per branch. */
   branches?: DecisionBranch[];
 }
 

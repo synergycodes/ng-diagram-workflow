@@ -4,13 +4,13 @@
 
 ![Workflow editor: a nodes library on the left, an order-confirmation workflow on the canvas with a selected decision branching into a notification and a delay, and the decision's branches being edited in the properties panel on the right](docs/assets/demo.png)
 
-Interactive workflow / automation editor built with Angular and [ngDiagram](https://www.ngdiagram.dev/). Drag triggers, actions, delays, decisions, notifications and AI agents onto a canvas, connect them and edit their settings in a side panel. Use this project as a starting point for building your own low-code flow designer, automation builder or node-based editor. Lean dependencies: Angular, ngDiagram, [Phosphor Icons](https://phosphoricons.com/) (web font) and [html-to-image](https://www.npmjs.com/package/html-to-image) (for JPEG export) — no opinionated third-party UI libraries.
+Interactive workflow / automation editor built with Angular and [ngDiagram](https://www.ngdiagram.dev/). Drag triggers, actions, delays, decisions, approvals, merges, notifications and AI agents onto a canvas, connect them and edit their settings in a side panel. Use this project as a starting point for building your own low-code flow designer, automation builder or node-based editor. Lean dependencies: Angular, ngDiagram, [Phosphor Icons](https://phosphoricons.com/) (web font) and [html-to-image](https://www.npmjs.com/package/html-to-image) (for JPEG export) — no opinionated third-party UI libraries.
 
 Features:
 
 - Drag-and-drop node placement from a searchable **Nodes Library** — each tile is a live preview of the node card
-- Six node types, all described by one **data-driven catalog**
-- Custom node templates beyond the default card: **Decision** (one output port per branch) and **AI Agent** (shows the chosen chat model and memory)
+- Eight node types, all described by one **data-driven catalog**
+- Custom node templates beyond the default card: **Decision** / **Approval** (one output port per branch) and **AI Agent** (shows the chosen chat model and memory)
 - **Properties panel** built with Angular **Signal Forms** — fields come from the catalog, can be shown or hidden depending on other values, and changes appear on the node card as you type
 - Labelled connections drawn as orthogonal edges with rounded corners; invalid connections are rejected (no self-loops, nothing can connect into a Trigger)
 - Right-click **context menus** — copy / cut / paste / delete on a node, paste on the background
@@ -20,14 +20,16 @@ Features:
 
 ## Node library
 
-| Node         | Template   | Ports                    | Settings                                              |
-| ------------ | ---------- | ------------------------ | ----------------------------------------------------- |
-| Trigger      | `workflow` | output only (start node) | time-based (CRON expression) or event-based (matcher) |
-| Action       | `workflow` | in, out                  | action type, email fields, API call, retry            |
-| Delay        | `workflow` | in, out                  | delay in milliseconds                                 |
-| Decision     | `decision` | in, one out per branch   | branches (add / rename / remove)                      |
-| Notification | `workflow` | in, out                  | channel, recipient, message                           |
-| AI Agent     | `ai-agent` | in, out                  | chat model, memory, system prompt                     |
+| Node         | Template   | Ports                    | Settings                                                     |
+| ------------ | ---------- | ------------------------ | ------------------------------------------------------------ |
+| Trigger      | `workflow` | output only (start node) | time-based (CRON expression) or event-based (matcher)        |
+| Action       | `workflow` | in, out                  | action type, email fields, API call, retry, simulate failure |
+| Delay        | `workflow` | in, out                  | delay in milliseconds                                        |
+| Decision     | `decision` | in, one out per branch   | branches (add / rename / remove)                             |
+| Approval     | `decision` | in, one out per branch   | approver, channel, timeout; Approved / Rejected branches     |
+| Merge        | `workflow` | in (many), out           | continue when all branches finish or the first one does      |
+| Notification | `workflow` | in, out                  | channel, recipient, message                                  |
+| AI Agent     | `ai-agent` | in, out                  | chat model, memory, system prompt, simulate failure          |
 
 Every node also has a Title and a Description.
 
@@ -100,7 +102,7 @@ src/
     └── top-navbar/                   # logo, editable workflow name, export, theme toggle
 ```
 
-The ng-diagram `node.type` selects the **template**, which controls the node's layout. `node.data.kind` says **what the node is**. This split lets Trigger, Action, Delay and Notification share one card template while Decision and AI Agent get their own.
+The ng-diagram `node.type` selects the **template**, which controls the node's layout. `node.data.kind` says **what the node is**. This split lets Trigger, Action, Delay, Notification and Merge share one card template, Decision and Approval share the branching template, and AI Agent gets its own.
 
 ### Properties forms
 

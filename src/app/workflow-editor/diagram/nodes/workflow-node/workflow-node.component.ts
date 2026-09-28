@@ -12,8 +12,8 @@ import { NodeHeaderComponent } from '../shared/node-header.component';
 import { NodeIconComponent } from '../shared/node-icon.component';
 
 /**
- * Default workflow card used by Trigger, Action, Delay and
- * Notification: the header plus a chip showing the chosen sub-type. One input
+ * Default workflow card used by Trigger, Action, Delay, Notification and
+ * Merge: the header plus a chip showing the chosen sub-type. One input
  * port on the left (omitted for start nodes) and one output port on the right.
  */
 @Component({
