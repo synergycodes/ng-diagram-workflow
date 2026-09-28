@@ -34,7 +34,7 @@ import { FormFieldComponent } from '../form-field/form-field.component';
       <button class="remove-button p10" type="button" (click)="remove()">Delete connection</button>
     </div>
   `,
-  styleUrl: '../node-properties/node-properties.component.scss',
+  styleUrl: './edge-properties.component.scss',
 })
 export class EdgePropertiesComponent {
   private readonly service = inject(PropertiesSidebarService);

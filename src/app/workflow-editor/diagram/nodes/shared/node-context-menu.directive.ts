@@ -20,8 +20,7 @@ export class NodeContextMenuDirective {
   protected onContextMenu(event: MouseEvent): void {
     event.preventDefault();
     event.stopPropagation();
-    const id = this.node().id;
-    this.actions.selectOnly(id);
-    this.contextMenu.openForNode(event.clientX, event.clientY, id);
+    this.actions.selectOnly(this.node().id);
+    this.contextMenu.openForNode(event.clientX, event.clientY);
   }
 }

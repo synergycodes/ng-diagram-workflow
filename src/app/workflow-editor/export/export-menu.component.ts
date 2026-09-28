@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { NodeIconComponent } from '../diagram/nodes/shared/node-icon.component';
 import { ExportService } from './export.service';
 
 /** Navbar "Export" button that opens a dropdown offering JPEG / JSON export. */
 @Component({
   selector: 'app-export-menu',
+  imports: [NodeIconComponent],
   templateUrl: './export-menu.component.html',
   styleUrl: './export-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,10 +1,12 @@
-import type { NgDiagramPaletteItem } from 'ng-diagram';
+import type { NgDiagramPaletteItem, Node, Point } from 'ng-diagram';
 import type { FieldDefinition, SelectOption } from './field-definitions';
 import {
   AI_AGENT_NODE_TYPE,
   DECISION_NODE_TYPE,
   WORKFLOW_NODE_TYPE,
   WorkflowNodeKind,
+  type DecisionBranch,
+  type NodeHeaderVariant,
   type PropertyValue,
   type WorkflowNodeData,
   type WorkflowNodeTemplate,
@@ -23,6 +25,8 @@ export interface NodeDefinition {
   icon: string;
   /** Which ng-diagram node template renders this kind. */
   template: WorkflowNodeTemplate;
+  /** Look of the header icon box (canvas card, palette tile). */
+  variant?: NodeHeaderVariant;
   /** A start node has no input port (nothing can connect into it). */
   isStart?: boolean;
   /** Kind-specific fields shown below the common Title / Description. */
@@ -31,6 +35,11 @@ export interface NodeDefinition {
   defaults: Readonly<Record<string, PropertyValue>>;
   /** Select field whose chosen option is shown as a chip on the node card. */
   summaryKey?: string;
+  /**
+   * Branches a new node starts with. A kind that has them routes the flow:
+   * one output port per branch, edited in the properties panel.
+   */
+  initialBranches?: readonly DecisionBranch[];
 }
 
 const EMAIL_FIELDS: readonly FieldDefinition[] = [
@@ -153,6 +162,10 @@ export const NODE_CATALOG: Record<WorkflowNodeKind, NodeDefinition> = {
     description: 'Route the workflow',
     icon: 'ph-arrows-split',
     template: DECISION_NODE_TYPE,
+    initialBranches: [
+      { id: 'b1', label: 'Branch 1' },
+      { id: 'b2', label: 'Branch 2' },
+    ],
     // Branches are edited by a dedicated list editor, not a catalog field.
     fields: [],
     defaults: {},
@@ -190,6 +203,7 @@ export const NODE_CATALOG: Record<WorkflowNodeKind, NodeDefinition> = {
     description: 'Delegate tasks',
     icon: 'mask:ai-agent',
     template: AI_AGENT_NODE_TYPE,
+    variant: 'ai',
     fields: [
       {
         kind: 'select',
@@ -230,7 +244,11 @@ export const PALETTE_ORDER: readonly WorkflowNodeKind[] = [
   WorkflowNodeKind.AiAgent,
 ];
 
-/** Fresh node data for a kind, with catalog defaults applied. */
+/**
+ * Fresh node data for a kind, with catalog defaults applied. `overrides`
+ * replace top-level fields, except `properties`, which are merged into the
+ * defaults.
+ */
 export function createNodeData(
   kind: WorkflowNodeKind,
   overrides: Partial<WorkflowNodeData> = {},
@@ -240,17 +258,22 @@ export function createNodeData(
     kind,
     label: def.label,
     description: def.description,
-    properties: { ...def.defaults },
-    ...(kind === WorkflowNodeKind.Decision
-      ? {
-          branches: [
-            { id: 'b1', label: 'Branch 1' },
-            { id: 'b2', label: 'Branch 2' },
-          ],
-        }
+    ...(def.initialBranches
+      ? { branches: def.initialBranches.map((branch) => ({ ...branch })) }
       : {}),
     ...overrides,
+    properties: { ...def.defaults, ...overrides.properties },
   };
+}
+
+/** A diagram node of a kind, rendered by the kind's catalog template. */
+export function createNode(
+  id: string,
+  kind: WorkflowNodeKind,
+  position: Point,
+  overrides: Partial<WorkflowNodeData> = {},
+): Node<WorkflowNodeData> {
+  return { id, type: NODE_CATALOG[kind].template, position, data: createNodeData(kind, overrides) };
 }
 
 /** ng-diagram palette item for a kind; dropping it creates the matching node. */

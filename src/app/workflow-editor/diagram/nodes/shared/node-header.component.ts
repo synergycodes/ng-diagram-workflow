@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import type { NodeHeaderVariant } from '../../model/workflow-types';
 import { NodeIconComponent } from './node-icon.component';
 
 /**
@@ -73,5 +74,5 @@ export class NodeHeaderComponent {
   readonly icon = input.required<string>();
   readonly label = input.required<string>();
   readonly description = input<string>('');
-  readonly variant = input<'default' | 'ai'>('default');
+  readonly variant = input<NodeHeaderVariant | undefined>('default');
 }

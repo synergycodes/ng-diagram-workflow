@@ -63,8 +63,8 @@ export class DiagramComponent {
         return !isStartNode(target);
       },
       // Every drawn connection becomes a label edge without arrowheads.
-      temporaryEdgeDataBuilder: (edge: Edge) => withLabelEdge(edge),
-      finalEdgeDataBuilder: (edge: Edge) => withLabelEdge(edge),
+      temporaryEdgeDataBuilder: withLabelEdge,
+      finalEdgeDataBuilder: withLabelEdge,
     },
     // Orthogonal paths with rounded corners, like Workflow Builder's smooth-step edges.
     edgeRouting: {

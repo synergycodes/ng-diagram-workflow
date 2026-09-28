@@ -58,39 +58,12 @@
 }
 
 .icon {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
   flex: none;
-  background-color: currentColor;
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
+  font-size: 16px;
 }
 
-.icon-export {
-  mask-image: url('../../../assets/export.svg');
-  -webkit-mask-image: url('../../../assets/export.svg');
-}
-
-.icon-image {
-  mask-image: url('../../../assets/image.svg');
-  -webkit-mask-image: url('../../../assets/image.svg');
-}
-
-.icon-json {
-  mask-image: url('../../../assets/braces.svg');
-  -webkit-mask-image: url('../../../assets/braces.svg');
-}
-
-.icon-caret {
-  width: 14px;
-  height: 14px;
-  mask-image: url('../../../assets/caret-down.svg');
-  -webkit-mask-image: url('../../../assets/caret-down.svg');
+.caret {
+  font-size: 14px;
   transition: transform 0.15s ease;
 
   &.open {

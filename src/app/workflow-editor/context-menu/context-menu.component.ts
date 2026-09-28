@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { EditorActionsService } from '../diagram/editor-actions.service';
+import { NodeIconComponent } from '../diagram/nodes/shared/node-icon.component';
 import { ContextMenuService } from './context-menu.service';
 
 interface MenuItem {
   id: 'copy' | 'cut' | 'paste' | 'delete';
   label: string;
+  /** Icon reference, see `NodeIconComponent`. */
   icon: string;
   disabled?: boolean;
   separatorBefore?: boolean;
@@ -13,6 +15,7 @@ interface MenuItem {
 /** Right-click menu for nodes (full actions) and the canvas background (paste). */
 @Component({
   selector: 'app-context-menu',
+  imports: [NodeIconComponent],
   templateUrl: './context-menu.component.html',
   styleUrl: './context-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,14 +44,14 @@ export class ContextMenuComponent {
     const canPaste = this.actions.canPaste();
 
     if (state.kind === 'background') {
-      return [{ id: 'paste', label: 'Paste', icon: 'paste', disabled: !canPaste }];
+      return [{ id: 'paste', label: 'Paste', icon: 'mask:paste', disabled: !canPaste }];
     }
 
     return [
-      { id: 'copy', label: 'Copy', icon: 'copy' },
-      { id: 'cut', label: 'Cut', icon: 'cut' },
-      { id: 'paste', label: 'Paste', icon: 'paste', disabled: !canPaste },
-      { id: 'delete', label: 'Delete', icon: 'trash', separatorBefore: true },
+      { id: 'copy', label: 'Copy', icon: 'mask:copy' },
+      { id: 'cut', label: 'Cut', icon: 'mask:cut' },
+      { id: 'paste', label: 'Paste', icon: 'mask:paste', disabled: !canPaste },
+      { id: 'delete', label: 'Delete', icon: 'mask:trash', separatorBefore: true },
     ];
   });
 

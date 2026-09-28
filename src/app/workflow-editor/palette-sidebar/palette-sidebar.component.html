@@ -10,14 +10,14 @@
       [attr.aria-expanded]="isExpanded()"
       aria-label="Toggle nodes library"
     >
-      <span class="icon icon-panel"></span>
+      <app-node-icon class="icon" icon="mask:sidebar" />
     </button>
   </header>
 
   @if (isExpanded()) {
     <div class="search-row">
       <div class="search-input">
-        <span class="icon icon-search"></span>
+        <app-node-icon class="icon" icon="mask:search" />
         <input
           class="search-field p10"
           type="text"

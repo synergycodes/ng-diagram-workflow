@@ -13,8 +13,6 @@ import {
   type WorkflowNodeData,
 } from '../diagram/model/workflow-types';
 
-type SidebarState = 'empty' | 'node' | 'edge' | 'multi';
-
 /**
  * Drives the properties sidebar: tracks panel visibility, exposes the current
  * single selection (a node or an edge) and applies edits back to the model.
@@ -45,12 +43,9 @@ export class PropertiesSidebarService {
       : undefined,
   );
 
-  readonly sidebarState = computed<SidebarState>(() => {
-    if (this.selectedNode()) return 'node';
-    if (this.selectedEdge()) return 'edge';
-    const count = this.selectedNodes().length + this.selectedEdges().length;
-    return count === 0 ? 'empty' : 'multi';
-  });
+  readonly isSelectionEmpty = computed(
+    () => this.selectedNodes().length === 0 && this.selectedEdges().length === 0,
+  );
 
   expandSidebar(): void {
     this.isExpanded.set(true);

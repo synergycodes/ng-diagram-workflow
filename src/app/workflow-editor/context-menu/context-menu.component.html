@@ -15,7 +15,7 @@
         [disabled]="item.disabled"
         (click)="run(item)"
       >
-        <span class="icon" [class]="'icon-' + item.icon"></span>
+        <app-node-icon class="icon" [icon]="item.icon" />
         {{ item.label }}
       </button>
     }

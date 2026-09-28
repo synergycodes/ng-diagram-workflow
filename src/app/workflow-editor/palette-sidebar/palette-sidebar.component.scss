@@ -85,9 +85,8 @@
   }
 
   .icon {
-    width: 16px;
-    height: 16px;
     flex: none;
+    font-size: 16px;
     color: var(--wf-text-tertiary);
   }
 }
@@ -118,24 +117,5 @@
 }
 
 .icon {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  background-color: currentColor;
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-}
-
-.icon-panel {
-  mask-image: url('../../../assets/sidebar.svg');
-  -webkit-mask-image: url('../../../assets/sidebar.svg');
-}
-
-.icon-search {
-  mask-image: url('../../../assets/search.svg');
-  -webkit-mask-image: url('../../../assets/search.svg');
+  font-size: 18px;
 }

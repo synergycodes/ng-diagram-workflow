@@ -22,6 +22,9 @@ export enum WorkflowNodeKind {
   AiAgent = 'ai-agent',
 }
 
+/** Look of the node header icon box; `ai` draws it on the AI gradient. */
+export type NodeHeaderVariant = 'default' | 'ai';
+
 /** Value of a kind-specific property edited in the properties panel. */
 export type PropertyValue = string | boolean;
 

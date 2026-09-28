@@ -4,7 +4,6 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
  * Renders an icon reference from the catalog. Accepted formats:
  * - `ph-<name>`   — a Phosphor (regular) icon font glyph, follows `currentColor`
  * - `mask:<file>` — a monochrome SVG from `assets/`, tinted with `currentColor`
- * - `img:<file>`  — a full-colour SVG from `assets/` (brand logos)
  *
  * Size follows the host `font-size`.
  */
@@ -23,9 +22,6 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
           aria-hidden="true"
         ></span>
       }
-      @case ('img') {
-        <img [src]="'assets/' + parsed().name + '.svg'" alt="" aria-hidden="true" />
-      }
     }
   `,
   styles: `
@@ -34,10 +30,6 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
       align-items: center;
       justify-content: center;
       line-height: 1;
-    }
-    img {
-      width: 1em;
-      height: 1em;
     }
   `,
 })

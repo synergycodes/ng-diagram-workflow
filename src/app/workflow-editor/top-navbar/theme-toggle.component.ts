@@ -1,8 +1,10 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { NodeIconComponent } from '../diagram/nodes/shared/node-icon.component';
 
 @Component({
   selector: 'app-theme-toggle',
+  imports: [NodeIconComponent],
   templateUrl: './theme-toggle.component.html',
   styleUrl: './theme-toggle.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -11,15 +13,11 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 export class ThemeToggleComponent {
   private readonly document = inject(DOCUMENT);
 
-  // Source of truth on init: the persisted preference first, then the
-  // already-applied dataset (set by the index.html bootstrap script).
-  activeTheme = signal<'light' | 'dark'>(this.readInitialTheme());
-
-  private readInitialTheme(): 'light' | 'dark' {
-    const stored = localStorage.getItem('theme');
-    if (stored === 'light' || stored === 'dark') return stored;
-    return this.document.documentElement.dataset['theme'] === 'light' ? 'light' : 'dark';
-  }
+  // The index.html bootstrap script has already applied the stored (or
+  // system-preferred) theme to the document.
+  activeTheme = signal<'light' | 'dark'>(
+    this.document.documentElement.dataset['theme'] === 'light' ? 'light' : 'dark',
+  );
 
   toggleTheme(): void {
     const next = this.activeTheme() === 'dark' ? 'light' : 'dark';

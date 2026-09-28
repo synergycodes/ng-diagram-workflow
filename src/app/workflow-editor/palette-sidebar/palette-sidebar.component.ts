@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { NODE_CATALOG, PALETTE_ORDER } from '../diagram/model/node-catalog';
+import { NodeIconComponent } from '../diagram/nodes/shared/node-icon.component';
 import { PaletteTileComponent } from './components/palette-tile/palette-tile.component';
 
 /**
@@ -8,7 +9,7 @@ import { PaletteTileComponent } from './components/palette-tile/palette-tile.com
  */
 @Component({
   selector: 'app-palette-sidebar',
-  imports: [PaletteTileComponent],
+  imports: [NodeIconComponent, PaletteTileComponent],
   templateUrl: './palette-sidebar.component.html',
   styleUrl: './palette-sidebar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

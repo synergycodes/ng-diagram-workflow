@@ -5,7 +5,6 @@ export interface ContextMenuState {
   /** Client coordinates where the menu opened (also used as paste position). */
   x: number;
   y: number;
-  nodeId?: string;
 }
 
 /** Tracks the open/closed state and target of the canvas context menu. */
@@ -13,8 +12,8 @@ export interface ContextMenuState {
 export class ContextMenuService {
   readonly state = signal<ContextMenuState | null>(null);
 
-  openForNode(x: number, y: number, nodeId: string): void {
-    this.state.set({ kind: 'node', x, y, nodeId });
+  openForNode(x: number, y: number): void {
+    this.state.set({ kind: 'node', x, y });
   }
 
   openForBackground(x: number, y: number): void {

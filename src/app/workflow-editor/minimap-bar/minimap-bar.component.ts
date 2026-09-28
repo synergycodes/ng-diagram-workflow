@@ -4,12 +4,13 @@ import {
   NgDiagramModelService,
   NgDiagramViewportService,
 } from 'ng-diagram';
+import { NodeIconComponent } from '../diagram/nodes/shared/node-icon.component';
 import { WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 
 /** Bottom-right bar: a zoom stepper plus a collapsible minimap. */
 @Component({
   selector: 'app-minimap-bar',
-  imports: [NgDiagramMinimapComponent],
+  imports: [NgDiagramMinimapComponent, NodeIconComponent],
   templateUrl: './minimap-bar.component.html',
   styleUrl: './minimap-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
