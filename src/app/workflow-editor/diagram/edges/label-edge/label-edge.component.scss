@@ -1,9 +1,21 @@
 /* Custom-template edges don't get the library's .default-edge class, so the
-   stroke states are driven here through --edge-stroke. */
+   stroke states are driven here through --edge-stroke. The label pill and its
+   hover / selected border colors come from ng-diagram-default-edge-label and
+   are themed through the --edge-label-* tokens. */
 ng-diagram-base-edge.label-edge {
   --edge-stroke: var(--wf-edge);
   --edge-stroke-width: 2;
   --edge-stroke-transition: stroke var(--wf-duration-fast) var(--wf-ease);
+
+  --edge-label-padding: 0.25rem 0.75rem;
+  --edge-label-border-radius: var(--wf-radius-sm);
+  --edge-label-background-color: var(--wf-bg-tertiary);
+  --edge-label-text-color: var(--wf-text-primary);
+  --edge-label-border-width: 2px;
+  --edge-label-border-color: var(--wf-edge);
+  --edge-label-border-color-hover: var(--wf-edge-hover);
+  --edge-label-border-color-selected: var(--wf-edge-selected);
+  --edge-label-border-transition: border-color var(--wf-duration-fast) var(--wf-ease);
 }
 
 ng-diagram-base-edge.label-edge:hover:not(.selected):not(.temporary) {
@@ -17,27 +29,18 @@ ng-diagram-base-edge.label-edge.temporary {
 
 ng-diagram-base-edge.label-edge.selected {
   --edge-stroke-width: 3;
+  --edge-label-border-width: 3px;
 }
 
-.label {
-  display: inline-block;
+/* Long labels are truncated with an ellipsis at 160px. */
+ng-diagram-default-edge-label {
+  display: block;
   max-width: 160px;
-  padding: 0.25rem 0.75rem;
+}
+
+.label-text {
+  min-width: 0;
   overflow: hidden;
-  border: 2px solid var(--wf-edge);
-  border-radius: var(--wf-radius-sm);
-  background: var(--wf-bg-tertiary);
-  color: var(--wf-text-primary);
   white-space: nowrap;
   text-overflow: ellipsis;
-  transition: border-color var(--wf-duration-fast) var(--wf-ease);
-
-  &.selected {
-    border-color: var(--wf-edge-selected);
-    border-width: 3px;
-  }
-}
-
-ng-diagram-base-edge.label-edge:hover .label:not(.selected) {
-  border-color: var(--wf-edge-hover);
 }

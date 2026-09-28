@@ -1,5 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { NgDiagramPortComponent, type NgDiagramNodeTemplate, type Node } from 'ng-diagram';
+import {
+  NgDiagramNodeSelectedDirective,
+  NgDiagramPortComponent,
+  type NgDiagramNodeTemplate,
+  type Node,
+} from 'ng-diagram';
 import { NODE_CATALOG } from '../../model/node-catalog';
 import { branchPortId, PORT_IN, type WorkflowNodeData } from '../../model/workflow-types';
 import { NodeContextMenuDirective } from '../shared/node-context-menu.directive';
@@ -12,20 +17,15 @@ import { NodeHeaderComponent } from '../shared/node-header.component';
  */
 @Component({
   selector: 'app-decision-node',
-  imports: [NgDiagramPortComponent, NodeHeaderComponent],
+  imports: [NgDiagramNodeSelectedDirective, NgDiagramPortComponent, NodeHeaderComponent],
   templateUrl: './decision-node.component.html',
   styleUrl: './decision-node.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   hostDirectives: [{ directive: NodeContextMenuDirective, inputs: ['node'] }],
-  host: {
-    class: 'ng-diagram-port-hoverable-over-node',
-    '[class.selected]': 'node().selected',
-  },
+  host: { class: 'ng-diagram-port-hoverable-over-node' },
 })
 export class DecisionNodeComponent implements NgDiagramNodeTemplate<WorkflowNodeData> {
   readonly node = input.required<Node<WorkflowNodeData>>();
-  /** Render without ports, e.g. as the palette drag preview outside the diagram. */
-  readonly preview = input(false);
 
   protected readonly portIn = PORT_IN;
   protected readonly branchPortId = branchPortId;

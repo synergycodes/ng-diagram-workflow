@@ -1,45 +1,42 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import {
   NgDiagramClipboardService,
-  NgDiagramModelService,
   NgDiagramSelectionService,
+  NgDiagramService,
   NgDiagramViewportService,
   type Point,
 } from 'ng-diagram';
 
 /**
  * Edit operations shared by the context menus: clipboard (copy / cut / paste)
- * and delete. Tracks whether the user has ever copied/cut, which gates the
- * Paste menu item. This is a one-way "has ever copied" hint, not live
- * clipboard state (ng-diagram does not expose a clipboard-content signal).
+ * and delete. Paste availability follows the diagram's clipboard state, so it
+ * also reflects copies made with keyboard shortcuts.
  */
 @Injectable()
 export class EditorActionsService {
   private readonly clipboard = inject(NgDiagramClipboardService);
   private readonly selection = inject(NgDiagramSelectionService);
-  private readonly modelService = inject(NgDiagramModelService);
+  private readonly diagram = inject(NgDiagramService);
   private readonly viewport = inject(NgDiagramViewportService);
 
-  /** Set once the user copies/cuts; gates the Paste menu item (one-way hint). */
-  readonly hasEverCopied = signal(false);
+  /** True while the diagram clipboard holds at least one node. */
+  readonly canPaste = computed(() => !!this.diagram.actionState().copyPaste?.copiedNodes.length);
 
   readonly hasSelection = computed(() => this.selection.selection().nodes.length > 0);
 
   copy(): void {
     if (!this.hasSelection()) return;
     this.clipboard.copy();
-    this.hasEverCopied.set(true);
   }
 
   cut(): void {
     if (!this.hasSelection()) return;
     this.clipboard.cut();
-    this.hasEverCopied.set(true);
   }
 
   /** Pastes the clipboard at a screen position (converted to flow coords). */
   pasteAt(clientPosition: Point): void {
-    if (!this.hasEverCopied()) return;
+    if (!this.canPaste()) return;
     this.clipboard.paste(this.viewport.clientToFlowPosition(clientPosition));
   }
 
@@ -47,13 +44,8 @@ export class EditorActionsService {
     this.selection.deleteSelection();
   }
 
-  /** Ensures a node is the sole selection (used before context-menu actions). */
+  /** Makes a node the sole selection (used before context-menu actions). */
   selectOnly(nodeId: string): void {
-    const already = this.selection.selection().nodes;
-    if (already.length === 1 && already[0].id === nodeId) return;
-    this.selection.deselectAll();
-    if (this.modelService.getNodeById(nodeId)) {
-      this.selection.select([nodeId]);
-    }
+    this.selection.select([nodeId]);
   }
 }

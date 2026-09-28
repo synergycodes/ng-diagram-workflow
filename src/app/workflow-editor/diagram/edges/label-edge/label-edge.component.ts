@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core
 import {
   NgDiagramBaseEdgeComponent,
   NgDiagramBaseEdgeLabelComponent,
+  NgDiagramDefaultEdgeLabelComponent,
   NgDiagramService,
   type Edge,
   type NgDiagramEdgeTemplate,
@@ -14,7 +15,11 @@ import type { WorkflowEdgeData } from '../../model/workflow-types';
  */
 @Component({
   selector: 'app-label-edge',
-  imports: [NgDiagramBaseEdgeComponent, NgDiagramBaseEdgeLabelComponent],
+  imports: [
+    NgDiagramBaseEdgeComponent,
+    NgDiagramBaseEdgeLabelComponent,
+    NgDiagramDefaultEdgeLabelComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-diagram-base-edge class="label-edge" [edge]="edge()">
@@ -23,7 +28,9 @@ import type { WorkflowEdgeData } from '../../model/workflow-types';
           [id]="edge().id + '-label'"
           [positionOnEdge]="edge().data.positionOnEdge ?? 0.5"
         >
-          <span class="label p11" [class.selected]="edge().selected">{{ edge().data.label }}</span>
+          <ng-diagram-default-edge-label>
+            <span class="label-text p11">{{ edge().data.label }}</span>
+          </ng-diagram-default-edge-label>
         </ng-diagram-base-edge-label>
       }
     </ng-diagram-base-edge>

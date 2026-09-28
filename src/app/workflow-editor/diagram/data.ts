@@ -26,8 +26,6 @@ function node(
     id,
     type: NODE_CATALOG[kind].template,
     position: { x, y },
-    resizable: false,
-    rotatable: false,
     data: {
       ...base,
       ...overrides,

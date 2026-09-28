@@ -258,8 +258,6 @@ export function toPaletteItem(kind: WorkflowNodeKind): NgDiagramPaletteItem<Work
   return {
     type: NODE_CATALOG[kind].template,
     data: createNodeData(kind),
-    resizable: false,
-    rotatable: false,
   };
 }
 

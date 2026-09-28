@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card" ngDiagramNodeSelected [node]="node()">
   <app-node-header [icon]="def().icon" [label]="data().label" [description]="data().description">
   </app-node-header>
 
@@ -7,14 +7,12 @@
     @for (branch of branches(); track branch.id; let i = $index) {
       <div class="item p11">
         <span class="item-label">{{ branch.label || 'Branch ' + (i + 1) }}</span>
-        @if (!preview()) {
-          <ng-diagram-port
-            class="branch-port"
-            [id]="branchPortId(branch.id)"
-            type="source"
-            side="right"
-          />
-        }
+        <ng-diagram-port
+          class="branch-port"
+          [id]="branchPortId(branch.id)"
+          type="source"
+          side="right"
+        />
       </div>
     } @empty {
       <div class="item placeholder p11">Add branches in the properties panel</div>
@@ -22,8 +20,6 @@
   </section>
 </div>
 
-@if (!preview()) {
-  <div class="header-ports">
-    <ng-diagram-port [id]="portIn" type="target" side="left" />
-  </div>
-}
+<div class="header-ports">
+  <ng-diagram-port [id]="portIn" type="target" side="left" />
+</div>
