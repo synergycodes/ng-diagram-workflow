@@ -1,31 +1,13 @@
 import type { Edge, Node } from 'ng-diagram';
-import { createNode } from './model/node-catalog';
+import { createNode } from '../model/node-catalog';
 import {
   branchPortId,
-  LABEL_EDGE_TYPE,
-  PORT_IN,
   PORT_OUT,
   WorkflowNodeKind,
   type WorkflowEdgeData,
   type WorkflowNodeData,
-} from './model/workflow-types';
-
-function edge(
-  source: string,
-  sourcePort: string,
-  target: string,
-  label?: string,
-): Edge<WorkflowEdgeData> {
-  return {
-    id: `${source}:${sourcePort}__${target}`,
-    type: LABEL_EDGE_TYPE,
-    source,
-    sourcePort,
-    target,
-    targetPort: PORT_IN,
-    data: label ? { label } : {},
-  };
-}
+} from '../model/workflow-types';
+import { edge, type WorkflowTemplate } from './workflow-template';
 
 const nodes: Node<WorkflowNodeData>[] = [
   createNode(
@@ -113,7 +95,12 @@ const edges: Edge<WorkflowEdgeData>[] = [
 ];
 
 /**
- * Seed workflow shown on first load: an order-confirmation flow that branches
- * on order value. Positions sit on the 18px snapping grid.
+ * The default seed: an order-confirmation flow that branches on order value.
+ * Positions sit on the 18px snapping grid.
  */
-export const workflowModel = { nodes, edges };
+export const orderConfirmationTemplate: WorkflowTemplate = {
+  id: 'order-confirmation',
+  name: 'Order confirmation',
+  icon: 'ph-shopping-cart',
+  model: { nodes, edges },
+};

@@ -18,13 +18,14 @@ import {
 import { ContextMenuService } from '../context-menu/context-menu.service';
 import { PaletteDragService } from '../palette-sidebar/palette-drag.service';
 import { PropertiesSidebarService } from '../properties-sidebar/properties-sidebar.service';
-import { WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
-import { workflowModel } from './data';
+import { ProjectNameService } from '../top-navbar/project-name.service';
+import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 import { LabelEdgeComponent } from './edges/label-edge/label-edge.component';
 import { cycleExitMiddleware } from './middlewares/cycle-exit.middleware';
 import { isStartNode } from './model/guards';
 import { LABEL_EDGE_TYPE } from './model/workflow-types';
 import { NODE_TEMPLATE_COMPONENTS } from './nodes/node-templates';
+import { initialTemplate } from './templates';
 
 /**
  * Workflow editor canvas.
@@ -49,7 +50,6 @@ export class DiagramComponent {
   private readonly paletteDrag = inject(PaletteDragService);
 
   private readonly grid = { width: this.config.gridSize, height: this.config.gridSize };
-  private readonly fitPadding = this.config.viewport.zoomToFitPadding;
 
   diagramConfig = {
     linking: {
@@ -84,12 +84,7 @@ export class DiagramComponent {
       zoomToFit: {
         onInit: true,
         // Extra room on each side keeps the workflow clear of the overlay panels.
-        padding: [
-          this.fitPadding + 72,
-          this.fitPadding + 72,
-          this.fitPadding + 72,
-          this.fitPadding + 340,
-        ],
+        padding: canvasFitPadding(this.config),
       },
     },
     watermarkPosition: 'bottom-left',
@@ -101,7 +96,13 @@ export class DiagramComponent {
   nodeTemplateMap = new NgDiagramNodeTemplateMap(Object.entries(NODE_TEMPLATE_COMPONENTS));
   edgeTemplateMap = new NgDiagramEdgeTemplateMap([[LABEL_EDGE_TYPE, LabelEdgeComponent]]);
 
-  model = initializeModel(workflowModel);
+  // `?template=<id>` picks the starting workflow; the default is the order flow.
+  private readonly template = initialTemplate();
+  model = initializeModel(structuredClone(this.template.model));
+
+  constructor() {
+    inject(ProjectNameService).rename(this.template.name);
+  }
 
   /**
    * Align a freshly dropped node with the drag preview (centred on the cursor),

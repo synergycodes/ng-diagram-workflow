@@ -8,6 +8,7 @@ Interactive workflow / automation editor built with Angular and [ngDiagram](http
 
 Features:
 
+- **Templates** for the common agentic patterns — prompt chaining, routing, parallelization, reflection loop, human-in-the-loop — plus the order-confirmation flow, picked from a "Select a template" dialog or deep-linked with `?template=<id>`
 - Drag-and-drop node placement from a searchable **Nodes Library** — each tile is a live preview of the node card
 - Eight node types, all described by one **data-driven catalog**
 - Custom node templates beyond the default card: **Decision** / **Approval** (one output port per branch) and **AI Agent** (shows the chosen chat model and memory)
@@ -48,7 +49,7 @@ npm install
 npm start
 ```
 
-Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads: an order-confirmation flow that emails the customer, branches on order value into a sales notification or a delay, then drafts and sends a follow-up with an AI agent (7 nodes, 6 connections). Try dragging a node from the library onto the canvas, wiring it into the flow and editing its settings in the properties panel. The sample workflow is seed data — replace it in [`diagram/data.ts`](src/app/workflow-editor/diagram/data.ts).
+Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads: an order-confirmation flow that emails the customer, branches on order value into a sales notification or a delay, then drafts and sends a follow-up with an AI agent (7 nodes, 6 connections). Try dragging a node from the library onto the canvas, wiring it into the flow and editing its settings in the properties panel. **Templates** at the bottom of the Nodes Library swaps in one of the AI pattern workflows; `?template=reflection-loop` (or `chaining`, `routing`, `parallelization`, `human-in-the-loop`) opens one directly. Templates are seed data in [`diagram/templates/`](src/app/workflow-editor/diagram/templates/).
 
 ## Scripts
 
@@ -75,6 +76,7 @@ Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads:
 | Routing, snapping     | `edgeRouting.orthogonal`, `snapping`, `background`                                          | `diagram/diagram.component.ts`                        |
 | Palette               | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                     | `palette-sidebar/components/palette-tile/`            |
 | Model updates         | `NgDiagramModelService.updateNodeData / updateEdgeData / deleteEdges`                       | `properties-sidebar/properties-sidebar.service.ts`    |
+| Replace the model     | `NgDiagramService.transaction({ waitForMeasurements })`, `addNodes / addEdges`, `zoomToFit` | `template-selector/template-selector.service.ts`      |
 | Selection             | `NgDiagramSelectionService`, `selectionGestureEnded`, `paletteItemDropped`                  | `properties-sidebar/`, `diagram/`                     |
 | Clipboard             | `NgDiagramClipboardService`                                                                 | `diagram/editor-actions.service.ts`                   |
 | Viewport, minimap     | `NgDiagramViewportService`, `NgDiagramMinimapComponent`                                     | `minimap-bar/`, `export/`                             |
@@ -91,13 +93,14 @@ src/
     ├── pages/                        # page shell: canvas + overlaid panels, provideNgDiagram()
     ├── diagram/
     │   ├── diagram.component.*       # ng-diagram host, config, template maps, events
-    │   ├── data.ts                   # seed workflow
+    │   ├── templates/                # seed workflows: order flow + one per AI pattern
     │   ├── editor-actions.service.ts # copy / cut / paste / delete
     │   ├── model/                    # types, node catalog, field model, guards, cycle check (+ specs)
     │   ├── middlewares/              # graph rules run on every model change
     │   ├── nodes/                    # workflow, decision, ai-agent templates + shared header/icon
     │   └── edges/label-edge/         # labelled edge template
     ├── palette-sidebar/              # Nodes Library + draggable tiles
+    ├── template-selector/            # "Select a template" dialog, swaps the model in place
     ├── properties-sidebar/           # panel, Signal Forms for nodes / edges, icon select control
     ├── minimap-bar/                  # zoom stepper + minimap popover
     ├── context-menu/                 # node / background right-click menu
@@ -136,7 +139,7 @@ few `--ngd-*` variables that drive the on-canvas look.
 - **Icons:** use `ph-<name>` for any [Phosphor](https://phosphoricons.com/) icon.
   For your own SVGs in `src/assets/`, use `mask:<file>` for a single-colour icon
   or `img:<file>` for a full-colour one.
-- **Change the seed workflow:** edit [`data.ts`](src/app/workflow-editor/diagram/data.ts).
+- **Change the seed workflows:** edit or add a file in [`diagram/templates/`](src/app/workflow-editor/diagram/templates/) and list it in `WORKFLOW_TEMPLATES`.
 - **Tune the editor:** edit `WORKFLOW_EDITOR_DEFAULTS` (zoom-to-fit padding,
   zoom step, grid size) in [`workflow-editor.config.ts`](src/app/workflow-editor/workflow-editor.config.ts),
   or override the `WORKFLOW_EDITOR_CONFIG` token in the page providers.

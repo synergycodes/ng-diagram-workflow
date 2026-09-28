@@ -1,0 +1,33 @@
+<!-- Clicks on the backdrop close the dialog; Escape is handled natively. -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+<dialog
+  #dialog
+  class="dialog"
+  aria-labelledby="template-selector-title"
+  (close)="selector.close()"
+  (click)="onDialogClick($event)"
+>
+  <header class="header">
+    <app-node-icon class="title-icon" icon="ph-cube" />
+    <h2 id="template-selector-title" class="h7 title">Select a template</h2>
+    <button class="close" type="button" aria-label="Close" (click)="selector.close()">
+      <i class="ph ph-x" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <p class="p10 subtitle">Get started quickly with pre-designed templates for your workflow</p>
+
+  <div class="tiles">
+    @for (template of templates; track template.id) {
+      <button class="tile" type="button" (click)="selector.load(template)">
+        <app-node-icon class="tile-icon" [icon]="template.icon" />
+        <span class="h10 tile-name">{{ template.name }}</span>
+        <span class="p11 tile-meta">{{ template.model.nodes.length }} nodes</span>
+      </button>
+    }
+    <button class="tile outlined" type="button" (click)="selector.load(null)">
+      <app-node-icon class="tile-icon" icon="ph-corners-out" />
+      <span class="h10 tile-name">Empty Canvas</span>
+    </button>
+  </div>
+</dialog>
