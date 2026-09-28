@@ -13,6 +13,7 @@ Features:
 - Custom node templates beyond the default card: **Decision** / **Approval** (one output port per branch) and **AI Agent** (shows the chosen chat model and memory)
 - **Properties panel** built with Angular **Signal Forms** — fields come from the catalog, can be shown or hidden depending on other values, and changes appear on the node card as you type
 - Labelled connections drawn as orthogonal edges with rounded corners; invalid connections are rejected (no self-loops, nothing can connect into a Trigger)
+- Graph rules in a **middleware**: a loop may only be drawn if a Decision or Approval can end it (reflection loops yes, endless agent ping-pong no)
 - Right-click **context menus** — copy / cut / paste / delete on a node, paste on the background
 - **Export** as JSON (nodes and connections) or as a JPEG snapshot of the canvas
 - Minimap and zoom controls; nodes snap to an 18px grid
@@ -70,6 +71,7 @@ Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads:
 | Dynamic ports         | one `ng-diagram-port` per decision branch                                                   | `diagram/nodes/decision-node/`                        |
 | Edge template + label | `NgDiagramEdgeTemplateMap`, `NgDiagramBaseEdgeComponent`, `NgDiagramBaseEdgeLabelComponent` | `diagram/edges/label-edge/`                           |
 | Connection rules      | `linking.validateConnection`, `finalEdgeDataBuilder`                                        | `diagram/diagram.component.ts`                        |
+| Graph rules           | `Middleware`, `createMiddlewares`, `[middlewares]` input                                    | `diagram/middlewares/`, `diagram/model/cycles.ts`     |
 | Routing, snapping     | `edgeRouting.orthogonal`, `snapping`, `background`                                          | `diagram/diagram.component.ts`                        |
 | Palette               | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                     | `palette-sidebar/components/palette-tile/`            |
 | Model updates         | `NgDiagramModelService.updateNodeData / updateEdgeData / deleteEdges`                       | `properties-sidebar/properties-sidebar.service.ts`    |
@@ -91,7 +93,8 @@ src/
     │   ├── diagram.component.*       # ng-diagram host, config, template maps, events
     │   ├── data.ts                   # seed workflow
     │   ├── editor-actions.service.ts # copy / cut / paste / delete
-    │   ├── model/                    # types, node catalog, field model, guards (+ specs)
+    │   ├── model/                    # types, node catalog, field model, guards, cycle check (+ specs)
+    │   ├── middlewares/              # graph rules run on every model change
     │   ├── nodes/                    # workflow, decision, ai-agent templates + shared header/icon
     │   └── edges/label-edge/         # labelled edge template
     ├── palette-sidebar/              # Nodes Library + draggable tiles
@@ -153,7 +156,7 @@ This template is a demo of the editor UI, not a workflow engine. It does not inc
 
 - undo/redo
 - persistence or import
-- workflow validation
+- workflow validation beyond connection rules and loop exits
 - auto-layout
 - workflow execution
 

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
+  createMiddlewares,
   initializeModel,
   NgDiagramBackgroundComponent,
   NgDiagramComponent,
@@ -20,6 +21,7 @@ import { PropertiesSidebarService } from '../properties-sidebar/properties-sideb
 import { WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 import { workflowModel } from './data';
 import { LabelEdgeComponent } from './edges/label-edge/label-edge.component';
+import { cycleExitMiddleware } from './middlewares/cycle-exit.middleware';
 import { isStartNode } from './model/guards';
 import { LABEL_EDGE_TYPE } from './model/workflow-types';
 import { NODE_TEMPLATE_COMPONENTS } from './nodes/node-templates';
@@ -92,6 +94,9 @@ export class DiagramComponent {
     },
     watermarkPosition: 'bottom-left',
   } satisfies NgDiagramConfig;
+
+  // Graph-level rules run as middleware on every model change.
+  middlewares = createMiddlewares((defaults) => [...defaults, cycleExitMiddleware]);
 
   nodeTemplateMap = new NgDiagramNodeTemplateMap(Object.entries(NODE_TEMPLATE_COMPONENTS));
   edgeTemplateMap = new NgDiagramEdgeTemplateMap([[LABEL_EDGE_TYPE, LabelEdgeComponent]]);
