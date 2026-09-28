@@ -23,8 +23,8 @@ import { PaletteDragService } from '../../palette-drag.service';
  * A draggable library tile. Like in Workflow Builder, the tile shows the node
  * header. Wraps ng-diagram's palette item so dropping it on the canvas creates
  * the matching node; while dragging, the drag image is the real node template
- * (rendered in preview mode, without ports) so it looks exactly like the node
- * that will be created.
+ * (ng-diagram does not show ports outside the canvas) so it looks exactly like
+ * the node that will be created.
  */
 @Component({
   selector: 'app-palette-tile',
@@ -35,7 +35,10 @@ import { PaletteDragService } from '../../palette-drag.service';
     NodeHeaderComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(dragstart)': 'onDragStart($event)' },
+  host: {
+    '(pointerdown)': 'onPointerDown()',
+    '(dragstart)': 'onDragStart($event)',
+  },
   template: `
     <ng-diagram-palette-item [item]="item()">
       <div class="tile">
@@ -48,9 +51,7 @@ import { PaletteDragService } from '../../palette-drag.service';
       </div>
       <ng-diagram-palette-item-preview>
         <div class="preview">
-          <ng-container
-            *ngComponentOutlet="previewComponent(); inputs: { node: previewNode(), preview: true }"
-          />
+          <ng-container *ngComponentOutlet="previewComponent(); inputs: { node: previewNode() }" />
         </div>
       </ng-diagram-palette-item-preview>
     </ng-diagram-palette-item>
@@ -80,6 +81,15 @@ export class PaletteTileComponent {
     position: { x: 0, y: 0 },
     data: this.item().data,
   }));
+
+  /**
+   * Every gesture starts without a centring offset. Only a mouse drag sets one
+   * (in `onDragStart`); a touch drag has no `dragstart`, so its node is dropped
+   * with the top-left corner at the finger, as ng-diagram places it.
+   */
+  protected onPointerDown(): void {
+    this.paletteDrag.grabOffset = null;
+  }
 
   /**
    * Centre the drag preview on the cursor, at the canvas zoom level. ng-diagram

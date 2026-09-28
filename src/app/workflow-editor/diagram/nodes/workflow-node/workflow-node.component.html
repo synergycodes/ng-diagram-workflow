@@ -12,11 +12,9 @@
   }
 </div>
 
-@if (!preview()) {
-  <div class="header-ports">
-    @if (!def().isStart) {
-      <ng-diagram-port [id]="portIn" type="target" side="left" />
-    }
-    <ng-diagram-port [id]="portOut" type="source" side="right" />
-  </div>
-}
+<div class="header-ports">
+  @if (!def().isStart) {
+    <ng-diagram-port [id]="portIn" type="target" side="left" />
+  }
+  <ng-diagram-port [id]="portOut" type="source" side="right" />
+</div>
