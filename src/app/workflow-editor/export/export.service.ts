@@ -57,13 +57,13 @@ export class ExportService {
       await nextFrame();
 
       const background = readVar('--wf-bg-canvas') || '#edeff3';
+      // html-to-image inlines the fonts used on the canvas (Poppins and the
+      // Phosphor icon font), because the rendered image cannot load the page's
+      // fonts. The Google Fonts <link> is CORS-enabled so its rules are readable.
       dataUrl = await toJpeg(element, {
         quality: 0.95,
         pixelRatio: 2,
         backgroundColor: background,
-        // The page already loads Poppins, so skip inlining the cross-origin
-        // Google Fonts stylesheet (which throws CORS errors and isn't needed).
-        skipFonts: true,
         filter: (node) => !(node instanceof HTMLElement && node.dataset['exportIgnore'] === 'true'),
       });
     } finally {
