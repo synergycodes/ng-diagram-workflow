@@ -48,20 +48,27 @@ export class ExportService {
     if (!element) return;
 
     // Fit the whole workflow into view, then give the browser a couple of
-    // frames to paint the fitted transform before the DOM is cloned.
-    await this.viewport.zoomToFit({ padding: [40, 40, 40, 40] });
-    await nextFrame();
+    // frames to paint the fitted transform before the DOM is cloned. The
+    // user's viewport is restored once the image is captured.
+    const { x, y, scale } = this.viewport.viewport();
+    let dataUrl: string;
+    try {
+      await this.viewport.zoomToFit({ padding: [40, 40, 40, 40] });
+      await nextFrame();
 
-    const background = readVar('--wf-bg-canvas') || '#edeff3';
-    const dataUrl = await toJpeg(element, {
-      quality: 0.95,
-      pixelRatio: 2,
-      backgroundColor: background,
-      // The page already loads Poppins, so skip inlining the cross-origin
-      // Google Fonts stylesheet (which throws CORS errors and isn't needed).
-      skipFonts: true,
-      filter: (node) => !(node instanceof HTMLElement && node.dataset['exportIgnore'] === 'true'),
-    });
+      const background = readVar('--wf-bg-canvas') || '#edeff3';
+      dataUrl = await toJpeg(element, {
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: background,
+        // The page already loads Poppins, so skip inlining the cross-origin
+        // Google Fonts stylesheet (which throws CORS errors and isn't needed).
+        skipFonts: true,
+        filter: (node) => !(node instanceof HTMLElement && node.dataset['exportIgnore'] === 'true'),
+      });
+    } finally {
+      await this.viewport.setViewport(x, y, scale);
+    }
 
     const blob = await (await fetch(dataUrl)).blob();
     this.download(blob, `${this.projectName.fileName()}.jpeg`);

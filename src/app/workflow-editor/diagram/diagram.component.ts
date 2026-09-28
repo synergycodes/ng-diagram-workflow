@@ -7,7 +7,6 @@ import {
   NgDiagramModelService,
   NgDiagramNodeTemplateMap,
   NgDiagramSelectionService,
-  NgDiagramViewportService,
   type Edge,
   type NgDiagramConfig,
   type Node,
@@ -41,7 +40,6 @@ import { NODE_TEMPLATE_COMPONENTS } from './nodes/node-templates';
 })
 export class DiagramComponent {
   private readonly config = inject(WORKFLOW_EDITOR_CONFIG);
-  private readonly viewportService = inject(NgDiagramViewportService);
   private readonly modelService = inject(NgDiagramModelService);
   private readonly selectionService = inject(NgDiagramSelectionService);
   private readonly sidebarService = inject(PropertiesSidebarService);
@@ -49,6 +47,7 @@ export class DiagramComponent {
   private readonly paletteDrag = inject(PaletteDragService);
 
   private readonly grid = { width: this.config.gridSize, height: this.config.gridSize };
+  private readonly fitPadding = this.config.viewport.zoomToFitPadding;
 
   diagramConfig = {
     linking: {
@@ -61,7 +60,6 @@ export class DiagramComponent {
       ) => {
         if (!source || !target || !sourcePort || !targetPort) return false;
         if (source.id === target.id) return false;
-        if (targetPort.type === 'source') return false;
         return !isStartNode(target);
       },
       // Every drawn connection becomes a label edge without arrowheads.
@@ -78,8 +76,20 @@ export class DiagramComponent {
       shouldSnapDragForNode: () => true,
       defaultDragSnap: this.grid,
     },
-    zoom: { min: 0.1, max: 2 },
-    zIndex: { elevateOnSelection: true },
+    zoom: {
+      min: 0.1,
+      max: 2,
+      zoomToFit: {
+        onInit: true,
+        // Extra room on each side keeps the workflow clear of the overlay panels.
+        padding: [
+          this.fitPadding + 72,
+          this.fitPadding + 72,
+          this.fitPadding + 72,
+          this.fitPadding + 340,
+        ],
+      },
+    },
     watermarkPosition: 'bottom-left',
   } satisfies NgDiagramConfig;
 
@@ -87,12 +97,6 @@ export class DiagramComponent {
   edgeTemplateMap = new NgDiagramEdgeTemplateMap([[LABEL_EDGE_TYPE, LabelEdgeComponent]]);
 
   model = initializeModel(workflowModel);
-
-  onDiagramInit(): void {
-    const pad = this.config.viewport.zoomToFitPadding;
-    // Extra room on each side keeps the workflow clear of the overlay panels.
-    void this.viewportService.zoomToFit({ padding: [pad + 72, pad + 72, pad + 72, pad + 340] });
-  }
 
   /**
    * Align a freshly dropped node with the drag preview (centred on the cursor),
@@ -132,8 +136,6 @@ function withLabelEdge(edge: Edge): Edge {
   return {
     ...edge,
     type: LABEL_EDGE_TYPE,
-    data: edge.data ?? {},
-    sourceArrowhead: undefined,
     targetArrowhead: undefined,
   };
 }

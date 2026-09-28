@@ -38,7 +38,7 @@ export class ContextMenuComponent {
   protected readonly items = computed<MenuItem[]>(() => {
     const state = this.state();
     if (!state) return [];
-    const canPaste = this.actions.hasEverCopied();
+    const canPaste = this.actions.canPaste();
 
     if (state.kind === 'background') {
       return [{ id: 'paste', label: 'Paste', icon: 'paste', disabled: !canPaste }];

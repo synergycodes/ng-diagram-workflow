@@ -26,9 +26,10 @@
   border-color: var(--wf-node-stroke-hover);
 }
 
-:host(.selected) .card {
+/* The focus-ring shadow comes from ng-diagram's .ng-diagram-node-selected
+   rule (--ngd-focus-ring-node-active, remapped in workflow-theme.css). */
+.card.ng-diagram-node-selected {
   border-color: var(--wf-node-stroke-hover);
-  box-shadow: 0 0 0 0.25rem var(--wf-focus-ring);
 }
 
 /* Invisible strip level with the header; its left/right ports sit on the card

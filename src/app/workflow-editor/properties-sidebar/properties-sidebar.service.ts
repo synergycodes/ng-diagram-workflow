@@ -1,5 +1,11 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { NgDiagramModelService, NgDiagramSelectionService, type Edge, type Node } from 'ng-diagram';
+import {
+  NgDiagramModelService,
+  NgDiagramSelectionService,
+  NgDiagramService,
+  type Edge,
+  type Node,
+} from 'ng-diagram';
 import { isLabelEdge, isWorkflowNode } from '../diagram/model/guards';
 import {
   branchPortId,
@@ -17,6 +23,7 @@ type SidebarState = 'empty' | 'node' | 'edge' | 'multi';
 export class PropertiesSidebarService {
   private readonly selectionService = inject(NgDiagramSelectionService);
   private readonly modelService = inject(NgDiagramModelService);
+  private readonly diagramService = inject(NgDiagramService);
 
   readonly isExpanded = signal(false);
 
@@ -55,8 +62,8 @@ export class PropertiesSidebarService {
 
   /**
    * Writes a node's data back to the model. When decision branches were
-   * removed, the connections leaving their ports are removed too so no edge is
-   * left pointing at a port that no longer exists.
+   * removed, the connections leaving their ports are removed in the same
+   * transaction, so no edge is left pointing at a port that no longer exists.
    */
   updateNodeData(nodeId: string, data: WorkflowNodeData): void {
     const node = this.modelService.getNodeById<WorkflowNodeData>(nodeId);
@@ -67,15 +74,19 @@ export class PropertiesSidebarService {
         .filter((old) => !data.branches?.some((branch) => branch.id === old.id))
         .map((branch) => branchPortId(branch.id)),
     );
-    if (removedPorts.size > 0) {
-      const orphans = this.modelService
-        .edges()
-        .filter((edge) => edge.source === nodeId && removedPorts.has(edge.sourcePort ?? ''))
-        .map((edge) => edge.id);
-      this.modelService.deleteEdges(orphans);
+    if (removedPorts.size === 0) {
+      this.modelService.updateNodeData<WorkflowNodeData>(nodeId, data);
+      return;
     }
 
-    this.modelService.updateNodeData<WorkflowNodeData>(nodeId, data);
+    const orphans = this.modelService
+      .getConnectedEdges(nodeId)
+      .filter((edge) => edge.source === nodeId && removedPorts.has(edge.sourcePort ?? ''))
+      .map((edge) => edge.id);
+    this.diagramService.transaction(() => {
+      this.modelService.deleteEdges(orphans);
+      this.modelService.updateNodeData<WorkflowNodeData>(nodeId, data);
+    });
   }
 
   updateEdgeData(edgeId: string, data: WorkflowEdgeData): void {
