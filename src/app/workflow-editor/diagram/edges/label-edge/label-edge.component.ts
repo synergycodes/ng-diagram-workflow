@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {
   NgDiagramBaseEdgeComponent,
   NgDiagramBaseEdgeLabelComponent,
   NgDiagramDefaultEdgeLabelComponent,
-  NgDiagramService,
   type Edge,
   type NgDiagramEdgeTemplate,
 } from 'ng-diagram';
@@ -23,7 +22,7 @@ import type { WorkflowEdgeData } from '../../model/workflow-types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ng-diagram-base-edge class="label-edge" [edge]="edge()">
-      @if (edge().data.label && isInitialized()) {
+      @if (edge().data.label) {
         <ng-diagram-base-edge-label
           [id]="edge().id + '-label'"
           [positionOnEdge]="edge().data.positionOnEdge ?? 0.5"
@@ -39,12 +38,4 @@ import type { WorkflowEdgeData } from '../../model/workflow-types';
 })
 export class LabelEdgeComponent implements NgDiagramEdgeTemplate<WorkflowEdgeData> {
   readonly edge = input.required<Edge<WorkflowEdgeData>>();
-
-  /**
-   * A label registers itself with the diagram when it is created; one created
-   * while the diagram is still initializing is never measured (and so stays
-   * hidden). Rendering labels only once the diagram is ready avoids that for
-   * edges that come with the initial model.
-   */
-  protected readonly isInitialized = inject(NgDiagramService).isInitialized;
 }

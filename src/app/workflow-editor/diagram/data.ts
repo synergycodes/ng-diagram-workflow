@@ -17,7 +17,7 @@ function edge(
   label?: string,
 ): Edge<WorkflowEdgeData> {
   return {
-    id: `${source}:${sourcePort}->${target}`,
+    id: `${source}:${sourcePort}__${target}`,
     type: LABEL_EDGE_TYPE,
     source,
     sourcePort,
