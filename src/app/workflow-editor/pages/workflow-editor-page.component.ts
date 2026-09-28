@@ -6,6 +6,7 @@ import { DiagramComponent } from '../diagram/diagram.component';
 import { EditorActionsService } from '../diagram/editor-actions.service';
 import { ExportService } from '../export/export.service';
 import { MinimapBarComponent } from '../minimap-bar/minimap-bar.component';
+import { PaletteDragService } from '../palette-sidebar/palette-drag.service';
 import { PaletteSidebarComponent } from '../palette-sidebar/palette-sidebar.component';
 import { PropertiesSidebarComponent } from '../properties-sidebar/properties-sidebar.component';
 import { PropertiesSidebarService } from '../properties-sidebar/properties-sidebar.service';
@@ -36,6 +37,7 @@ import { TopNavbarComponent } from '../top-navbar/top-navbar.component';
     EditorActionsService,
     ExportService,
     ContextMenuService,
+    PaletteDragService,
   ],
 })
 export class WorkflowEditorPageComponent {

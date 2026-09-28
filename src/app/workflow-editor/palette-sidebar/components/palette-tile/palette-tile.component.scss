@@ -24,6 +24,7 @@ ng-diagram-palette-item:hover .tile {
   border-color: var(--wf-node-stroke-hover);
 }
 
+/* Drag preview: the node card sizes itself (see node-card.scss). */
 .preview {
-  width: var(--wf-node-width);
+  width: max-content;
 }

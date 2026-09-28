@@ -24,6 +24,8 @@ import { NodeHeaderComponent } from '../shared/node-header.component';
 })
 export class DecisionNodeComponent implements NgDiagramNodeTemplate<WorkflowNodeData> {
   readonly node = input.required<Node<WorkflowNodeData>>();
+  /** Render without ports, e.g. as the palette drag preview outside the diagram. */
+  readonly preview = input(false);
 
   protected readonly portIn = PORT_IN;
   protected readonly branchPortId = branchPortId;

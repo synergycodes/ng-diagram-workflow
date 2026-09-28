@@ -4,6 +4,7 @@ import {
   NgDiagramBackgroundComponent,
   NgDiagramComponent,
   NgDiagramEdgeTemplateMap,
+  NgDiagramModelService,
   NgDiagramNodeTemplateMap,
   NgDiagramSelectionService,
   NgDiagramViewportService,
@@ -15,20 +16,14 @@ import {
   type SelectionGestureEndedEvent,
 } from 'ng-diagram';
 import { ContextMenuService } from '../context-menu/context-menu.service';
+import { PaletteDragService } from '../palette-sidebar/palette-drag.service';
 import { PropertiesSidebarService } from '../properties-sidebar/properties-sidebar.service';
 import { WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 import { workflowModel } from './data';
 import { LabelEdgeComponent } from './edges/label-edge/label-edge.component';
 import { isStartNode } from './model/guards';
-import {
-  AI_AGENT_NODE_TYPE,
-  DECISION_NODE_TYPE,
-  LABEL_EDGE_TYPE,
-  WORKFLOW_NODE_TYPE,
-} from './model/workflow-types';
-import { AiAgentNodeComponent } from './nodes/ai-agent-node/ai-agent-node.component';
-import { DecisionNodeComponent } from './nodes/decision-node/decision-node.component';
-import { WorkflowNodeComponent } from './nodes/workflow-node/workflow-node.component';
+import { LABEL_EDGE_TYPE } from './model/workflow-types';
+import { NODE_TEMPLATE_COMPONENTS } from './nodes/node-templates';
 
 /**
  * Workflow editor canvas.
@@ -47,9 +42,11 @@ import { WorkflowNodeComponent } from './nodes/workflow-node/workflow-node.compo
 export class DiagramComponent {
   private readonly config = inject(WORKFLOW_EDITOR_CONFIG);
   private readonly viewportService = inject(NgDiagramViewportService);
+  private readonly modelService = inject(NgDiagramModelService);
   private readonly selectionService = inject(NgDiagramSelectionService);
   private readonly sidebarService = inject(PropertiesSidebarService);
   private readonly contextMenu = inject(ContextMenuService);
+  private readonly paletteDrag = inject(PaletteDragService);
 
   private readonly grid = { width: this.config.gridSize, height: this.config.gridSize };
 
@@ -86,11 +83,7 @@ export class DiagramComponent {
     watermarkPosition: 'bottom-left',
   } satisfies NgDiagramConfig;
 
-  nodeTemplateMap = new NgDiagramNodeTemplateMap([
-    [WORKFLOW_NODE_TYPE, WorkflowNodeComponent],
-    [DECISION_NODE_TYPE, DecisionNodeComponent],
-    [AI_AGENT_NODE_TYPE, AiAgentNodeComponent],
-  ]);
+  nodeTemplateMap = new NgDiagramNodeTemplateMap(Object.entries(NODE_TEMPLATE_COMPONENTS));
   edgeTemplateMap = new NgDiagramEdgeTemplateMap([[LABEL_EDGE_TYPE, LabelEdgeComponent]]);
 
   model = initializeModel(workflowModel);
@@ -101,8 +94,22 @@ export class DiagramComponent {
     void this.viewportService.zoomToFit({ padding: [pad + 72, pad + 72, pad + 72, pad + 340] });
   }
 
-  /** Select a freshly dropped node and open its properties. */
-  onPaletteItemDropped(event: PaletteItemDroppedEvent): void {
+  /**
+   * Align a freshly dropped node with the drag preview (centred on the cursor),
+   * then select it and open its properties.
+   */
+  async onPaletteItemDropped(event: PaletteItemDroppedEvent): Promise<void> {
+    const offset = this.paletteDrag.grabOffset;
+    this.paletteDrag.grabOffset = null;
+    if (offset) {
+      // ng-diagram already snapped the drop point; shifting by whole grid cells keeps it snapped.
+      const { position } = event.node;
+      const snap = (value: number) =>
+        Math.round(value / this.config.gridSize) * this.config.gridSize;
+      await this.modelService.updateNode(event.node.id, {
+        position: { x: position.x - snap(offset.x), y: position.y - snap(offset.y) },
+      });
+    }
     this.selectionService.select([event.node.id]);
     this.sidebarService.expandSidebar();
   }
