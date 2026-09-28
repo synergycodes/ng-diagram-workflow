@@ -27,7 +27,7 @@ export class PropertiesSidebarComponent {
   private readonly service = inject(PropertiesSidebarService);
 
   protected readonly isExpanded = this.service.isExpanded;
-  protected readonly state = this.service.sidebarState;
+  protected readonly isSelectionEmpty = this.service.isSelectionEmpty;
   protected readonly node = this.service.selectedNode;
   protected readonly edge = this.service.selectedEdge;
 

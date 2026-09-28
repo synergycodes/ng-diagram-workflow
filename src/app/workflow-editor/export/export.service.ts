@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { toJpeg } from 'html-to-image';
+import { toCanvas } from 'html-to-image';
 import { NgDiagramModelService, NgDiagramViewportService, type Point } from 'ng-diagram';
 import { isLabelEdge, isWorkflowNode } from '../diagram/model/guards';
 import type { DecisionBranch, PropertyValue } from '../diagram/model/workflow-types';
@@ -51,7 +51,7 @@ export class ExportService {
     // frames to paint the fitted transform before the DOM is cloned. The
     // user's viewport is restored once the image is captured.
     const { x, y, scale } = this.viewport.viewport();
-    let dataUrl: string;
+    let canvas: HTMLCanvasElement;
     try {
       await this.viewport.zoomToFit({ padding: [40, 40, 40, 40] });
       await nextFrame();
@@ -60,18 +60,13 @@ export class ExportService {
       // html-to-image inlines the fonts used on the canvas (Poppins and the
       // Phosphor icon font), because the rendered image cannot load the page's
       // fonts. The Google Fonts <link> is CORS-enabled so its rules are readable.
-      dataUrl = await toJpeg(element, {
-        quality: 0.95,
-        pixelRatio: 2,
-        backgroundColor: background,
-        filter: (node) => !(node instanceof HTMLElement && node.dataset['exportIgnore'] === 'true'),
-      });
+      canvas = await toCanvas(element, { pixelRatio: 2, backgroundColor: background });
     } finally {
       await this.viewport.setViewport(x, y, scale);
     }
 
-    const blob = await (await fetch(dataUrl)).blob();
-    this.download(blob, `${this.projectName.fileName()}.jpeg`);
+    const blob = await toJpegBlob(canvas, 0.95);
+    if (blob) this.download(blob, `${this.projectName.fileName()}.jpeg`);
   }
 
   private buildDocument(): WorkflowDocument {
@@ -124,4 +119,8 @@ function nextFrame(): Promise<void> {
   return new Promise((resolve) =>
     requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
   );
+}
+
+function toJpegBlob(canvas: HTMLCanvasElement, quality: number): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
 }

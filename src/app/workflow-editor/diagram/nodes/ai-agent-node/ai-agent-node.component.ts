@@ -39,10 +39,15 @@ export class AiAgentNodeComponent implements NgDiagramNodeTemplate<WorkflowNodeD
   protected readonly data = computed(() => this.node().data);
   protected readonly def = computed(() => NODE_CATALOG[this.data().kind]);
 
+  /** One section per select field of the catalog entry (chat model, memory). */
   protected readonly sections = computed(() =>
-    [
-      { key: 'chatModel', title: 'Chat Model', placeholder: 'Add Chat Model' },
-      { key: 'memory', title: 'Memory', placeholder: 'Add Memory' },
-    ].map((section) => ({ ...section, option: selectedOption(this.data(), section.key) })),
+    this.def()
+      .fields.filter((field) => field.kind === 'select')
+      .map((field) => ({
+        key: field.key,
+        title: field.label,
+        placeholder: field.placeholder ?? '',
+        option: selectedOption(this.data(), field.key),
+      })),
   );
 }

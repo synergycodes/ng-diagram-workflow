@@ -11,7 +11,7 @@ import { form, FormField, type FieldTree } from '@angular/forms/signals';
 import type { Node } from 'ng-diagram';
 import { isFieldVisible } from '../../../diagram/model/field-definitions';
 import { NODE_CATALOG } from '../../../diagram/model/node-catalog';
-import { WorkflowNodeKind, type WorkflowNodeData } from '../../../diagram/model/workflow-types';
+import type { WorkflowNodeData } from '../../../diagram/model/workflow-types';
 import { PropertiesSidebarService } from '../../properties-sidebar.service';
 import { FormFieldComponent } from '../form-field/form-field.component';
 import { IconSelectComponent } from '../icon-select/icon-select.component';
@@ -40,7 +40,7 @@ export class NodePropertiesComponent {
   protected readonly form = form(this.model);
 
   protected readonly def = computed(() => NODE_CATALOG[this.model().kind]);
-  protected readonly isDecision = computed(() => this.model().kind === WorkflowNodeKind.Decision);
+  protected readonly hasBranches = computed(() => !!this.def().initialBranches);
   protected readonly visibleFields = computed(() =>
     this.def().fields.filter((field) => isFieldVisible(field, this.model().properties)),
   );

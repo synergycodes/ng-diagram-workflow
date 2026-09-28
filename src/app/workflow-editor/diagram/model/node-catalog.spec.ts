@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { isFieldVisible } from './field-definitions';
 import {
+  createNode,
   createNodeData,
   NODE_CATALOG,
   PALETTE_ORDER,
@@ -42,6 +43,34 @@ describe('createNodeData', () => {
   it('seeds decision nodes with two branches', () => {
     expect(createNodeData(WorkflowNodeKind.Decision).branches).toHaveLength(2);
     expect(createNodeData(WorkflowNodeKind.Delay).branches).toBeUndefined();
+  });
+
+  it('copies the initial branches so nodes never share them', () => {
+    const a = createNodeData(WorkflowNodeKind.Decision);
+    a.branches![0].label = 'changed';
+    expect(createNodeData(WorkflowNodeKind.Decision).branches![0].label).toBe('Branch 1');
+  });
+
+  it('merges property overrides into the defaults', () => {
+    const data = createNodeData(WorkflowNodeKind.Action, {
+      label: 'Custom',
+      properties: { subject: 'Hi' },
+    });
+    expect(data.label).toBe('Custom');
+    expect(data.properties['subject']).toBe('Hi');
+    expect(data.properties['type']).toBe('sendEmail');
+  });
+});
+
+describe('createNode', () => {
+  it('renders the kind with its catalog template', () => {
+    const node = createNode('n1', WorkflowNodeKind.Decision, { x: 18, y: 36 });
+    expect(node).toMatchObject({
+      id: 'n1',
+      type: NODE_CATALOG[WorkflowNodeKind.Decision].template,
+      position: { x: 18, y: 36 },
+    });
+    expect(node.data.kind).toBe(WorkflowNodeKind.Decision);
   });
 });
 

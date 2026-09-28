@@ -44,42 +44,12 @@
     cursor: default;
   }
 
-  &.danger:not(:disabled) {
-    color: var(--wf-text-primary);
-  }
-
   &.danger:not(:disabled):hover {
     color: var(--wf-danger);
   }
 }
 
 .icon {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
   flex: none;
-  background-color: currentColor;
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-}
-
-.icon-copy {
-  mask-image: url('../../../assets/copy.svg');
-  -webkit-mask-image: url('../../../assets/copy.svg');
-}
-.icon-cut {
-  mask-image: url('../../../assets/cut.svg');
-  -webkit-mask-image: url('../../../assets/cut.svg');
-}
-.icon-paste {
-  mask-image: url('../../../assets/paste.svg');
-  -webkit-mask-image: url('../../../assets/paste.svg');
-}
-.icon-trash {
-  mask-image: url('../../../assets/trash.svg');
-  -webkit-mask-image: url('../../../assets/trash.svg');
+  font-size: 16px;
 }

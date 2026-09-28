@@ -46,7 +46,7 @@ import { PaletteDragService } from '../../palette-drag.service';
           [icon]="def().icon"
           [label]="def().label"
           [description]="def().description"
-          [variant]="variant()"
+          [variant]="def().variant"
         />
       </div>
       <ng-diagram-palette-item-preview>
@@ -67,9 +67,6 @@ export class PaletteTileComponent {
 
   protected readonly item = computed(() => toPaletteItem(this.kind()));
   protected readonly def = computed(() => NODE_CATALOG[this.kind()]);
-  protected readonly variant = computed(() =>
-    this.def().template === 'ai-agent' ? 'ai' : 'default',
-  );
 
   /** The node the drop will create, rendered by its own template as the preview. */
   protected readonly previewComponent = computed(

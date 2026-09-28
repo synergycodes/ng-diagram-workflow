@@ -6,9 +6,9 @@
   (click)="toggleTheme()"
 >
   <span class="toggle-indicator" [class.active]="theme === 'light'" aria-hidden="true">
-    <span class="icon icon-sun"></span>
+    <app-node-icon class="icon" icon="mask:sun" />
   </span>
   <span class="toggle-indicator" [class.active]="theme === 'dark'" aria-hidden="true">
-    <span class="icon icon-moon"></span>
+    <app-node-icon class="icon" icon="mask:moon" />
   </span>
 </button>

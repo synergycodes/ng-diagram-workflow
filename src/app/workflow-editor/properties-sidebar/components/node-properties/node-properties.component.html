@@ -68,7 +68,7 @@
   </section>
 }
 
-@if (isDecision()) {
+@if (hasBranches()) {
   <section class="group">
     <h3 class="h10 group-title">Branches</h3>
     @for (branch of model().branches ?? []; track branch.id; let i = $index) {

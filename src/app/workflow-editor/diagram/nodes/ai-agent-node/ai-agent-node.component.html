@@ -1,6 +1,6 @@
 <div class="card" ngDiagramNodeSelected [node]="node()">
   <app-node-header
-    variant="ai"
+    [variant]="def().variant"
     [icon]="def().icon"
     [label]="data().label"
     [description]="data().description"
