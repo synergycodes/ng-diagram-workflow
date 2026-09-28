@@ -32,13 +32,13 @@ const MAX_VISITS = 3;
  * - `simulateFailure` fails the step; an Action with `retryOnFailure` fails
  *   once and then succeeds
  * - a Decision takes a branch that loops back once (reflection loop), then a
- *   random forward branch
+ *   the first wired forward branch, so every run takes the same path
  * - an Approval waits until `submitDecision` picks its branch
  * - a Merge waits for every incoming connection (`all`) or the first (`any`)
  */
 @Injectable()
 export class MockWorkflowBackend extends WorkflowBackend {
-  /** Source of randomness for branch choice and timing jitter (tests pin it). */
+  /** Source of timing jitter, so parallel steps don't finish in lockstep (tests pin it). */
   random: () => number = Math.random;
 
   private active?: MockRun;
@@ -169,7 +169,7 @@ class MockRun {
     this.follow(this.outgoing(node.id, PORT_OUT));
   }
 
-  /** Loop back once if a branch leads to a step already run, else pick a forward branch. */
+  /** Loop back once if a branch leads to a step already run, else take the first forward branch. */
   private chooseBranch(node: DocNode) {
     const wired = (node.branches ?? [])
       .map((branch) => ({ branch, edges: this.outgoing(node.id, branchPortId(branch.id)) }))
@@ -184,7 +184,7 @@ class MockRun {
     }
     const forward = wired.filter((w) => !loopsBack(w));
     const options = forward.length > 0 ? forward : wired;
-    return options[Math.floor(this.random() * options.length)]?.branch;
+    return options[0]?.branch;
   }
 
   private follow(edges: Connection[]): void {

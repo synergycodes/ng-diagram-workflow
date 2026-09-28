@@ -5,6 +5,7 @@ import {
   humanInTheLoopTemplate,
   parallelizationTemplate,
   reflectionLoopTemplate,
+  routingTemplate,
 } from '../diagram/templates/ai-patterns';
 import type { WorkflowTemplate } from '../diagram/templates';
 import { edge } from '../diagram/templates/workflow-template';
@@ -14,9 +15,9 @@ import { toWorkflowDocument } from './workflow-document';
 
 const { Action, AiAgent, Trigger } = WorkflowNodeKind;
 
-function start(model: WorkflowTemplate['model']) {
+function start(model: WorkflowTemplate['model'], random = 0.5) {
   const backend = new MockWorkflowBackend();
-  backend.random = () => 0.5;
+  backend.random = () => random;
   const events: RunEvent[] = [];
   backend
     .start(toWorkflowDocument(model.nodes, model.edges, 'test'))
@@ -47,6 +48,16 @@ describe('MockWorkflowBackend', () => {
     vi.runAllTimers();
     expect(run.statuses('b')).toEqual(['running', 'succeeded']);
     expect(run.finished()).toEqual({ type: 'finished', outcome: 'succeeded' });
+  });
+
+  it('routes every run down the same branch', () => {
+    for (const random of [0, 0.99]) {
+      const run = start(routingTemplate.model, random);
+      vi.runAllTimers();
+      expect(run.statuses('billing-agent')).toEqual(['running', 'succeeded']);
+      expect(run.statuses('tech-agent')).toEqual([]);
+      expect(run.statuses('handoff')).toEqual([]);
+    }
   });
 
   it('waits at a Merge until every parallel branch has arrived', () => {
