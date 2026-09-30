@@ -10,6 +10,9 @@ import type { WorkflowTemplate } from './workflow-template';
 
 export type { WorkflowTemplate } from './workflow-template';
 
+/** Query param that deep-links a template (`?template=<id>`). */
+export const TEMPLATE_QUERY_PARAM = 'template';
+
 /** Templates in dialog order; the first one is loaded on start. */
 export const WORKFLOW_TEMPLATES: readonly WorkflowTemplate[] = [
   orderConfirmationTemplate,
@@ -20,8 +23,7 @@ export const WORKFLOW_TEMPLATES: readonly WorkflowTemplate[] = [
   humanInTheLoopTemplate,
 ];
 
-/** The template named by `?template=<id>`, else the default one. */
-export function initialTemplate(search = globalThis.location?.search ?? ''): WorkflowTemplate {
-  const id = new URLSearchParams(search).get('template');
+/** The template with this id (from the query param), else the default one. */
+export function templateById(id: string | null | undefined): WorkflowTemplate {
   return WORKFLOW_TEMPLATES.find((t) => t.id === id) ?? WORKFLOW_TEMPLATES[0];
 }

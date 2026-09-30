@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Edge, Node } from 'ng-diagram';
+import { WORKFLOW_TEMPLATES } from '../templates';
 import { createNode } from './node-catalog';
 import { createsCycleWithoutExit } from './cycles';
 import { WorkflowNodeKind } from './workflow-types';
@@ -46,6 +47,19 @@ describe('createsCycleWithoutExit', () => {
       ['b', 'a'],
     ]);
     expect(createsCycleWithoutExit(nodes, edges, last)).toBe(true);
+  });
+
+  /** Every seed workflow has to survive the rule that runs when it is loaded. */
+  it('accepts every connection in the shipped templates', () => {
+    for (const template of WORKFLOW_TEMPLATES) {
+      const nodes = new Map<string, Node>(template.model.nodes.map((node) => [node.id, node]));
+      for (const edge of template.model.edges) {
+        expect(
+          createsCycleWithoutExit(nodes, template.model.edges, edge),
+          `${template.id}: ${edge.id}`,
+        ).toBe(false);
+      }
+    }
   });
 
   it('accepts flows without a cycle, including a parallel fan-out and merge', () => {

@@ -4,6 +4,7 @@ import { ContextMenuComponent } from '../context-menu/context-menu.component';
 import { ContextMenuService } from '../context-menu/context-menu.service';
 import { DiagramComponent } from '../diagram/diagram.component';
 import { EditorActionsService } from '../diagram/editor-actions.service';
+import { EditorNoticeService } from '../editor-notice.service';
 import { WorkflowBackend } from '../execution/execution-types';
 import { ExecutionService } from '../execution/execution.service';
 import { MockWorkflowBackend } from '../execution/mock-backend';
@@ -44,6 +45,7 @@ import { TopNavbarComponent } from '../top-navbar/top-navbar.component';
     ExportService,
     ContextMenuService,
     PaletteDragService,
+    EditorNoticeService,
     TemplateSelectorService,
     ExecutionService,
     // Swap in a real backend client here; the canvas only sees `RunEvent`s.

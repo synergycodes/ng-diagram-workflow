@@ -1,6 +1,7 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { NgDiagramModelService } from 'ng-diagram';
 import type { Subscription } from 'rxjs';
+import { EditorNoticeService } from '../editor-notice.service';
 import { ProjectNameService } from '../top-navbar/project-name.service';
 import {
   WorkflowBackend,
@@ -26,6 +27,7 @@ export class ExecutionService {
   private readonly backend = inject(WorkflowBackend);
   private readonly modelService = inject(NgDiagramModelService);
   private readonly projectName = inject(ProjectNameService);
+  private readonly notice = inject(EditorNoticeService);
   private subscription?: Subscription;
 
   readonly statuses = signal<Readonly<Record<string, NodeRunState>>>({});
@@ -34,14 +36,21 @@ export class ExecutionService {
   readonly outcome = signal<RunOutcome | null>(null);
   readonly isRunning = computed(() => this.state() === 'running');
 
+  constructor() {
+    // A run outlives the page otherwise: the stream keeps ticking and writing
+    // to signals nothing reads any more.
+    inject(DestroyRef).onDestroy(() => this.reset());
+  }
+
   run(): void {
+    const nodes = this.modelService.nodes();
+    if (nodes.length === 0) {
+      this.notice.report('Nothing to run — add a step to the canvas first.');
+      return;
+    }
     this.reset();
     this.state.set('running');
-    const doc = toWorkflowDocument(
-      this.modelService.nodes(),
-      this.modelService.edges(),
-      this.projectName.name(),
-    );
+    const doc = toWorkflowDocument(nodes, this.modelService.edges(), this.projectName.name());
     this.subscription = this.backend.start(doc).subscribe((event) => this.apply(event));
   }
 

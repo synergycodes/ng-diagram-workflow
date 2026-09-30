@@ -13,10 +13,10 @@ const LOOK = {
   selector: 'app-node-status',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (look(); as look) {
-      <span class="pill p11" [class]="state()!.status" role="status">
-        <i class="ph {{ look.icon }}" aria-hidden="true"></i>
-        {{ state()!.message || look.label }}
+    @if (pill(); as pill) {
+      <span class="pill p11" [class]="pill.status" role="status">
+        <i class="ph {{ pill.icon }}" aria-hidden="true"></i>
+        {{ pill.label }}
       </span>
     }
   `,
@@ -69,8 +69,11 @@ const LOOK = {
 export class NodeStatusComponent {
   readonly state = input<NodeRunState | undefined>();
 
-  protected readonly look = computed(() => {
+  /** Everything the pill renders, or `undefined` when there is nothing to show. */
+  protected readonly pill = computed(() => {
     const state = this.state();
-    return state ? LOOK[state.status] : undefined;
+    if (!state) return undefined;
+    const { icon, label } = LOOK[state.status];
+    return { status: state.status, icon, label: state.message || label };
   });
 }

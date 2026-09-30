@@ -10,6 +10,12 @@ export interface WorkflowEditorConfig {
   };
   /** Grid step (px) nodes snap to while dragging. */
   gridSize: number;
+  /**
+   * Room (px) the overlay panels take on each side of the canvas: navbar on
+   * top, properties panel on the right, zoom bar at the bottom, nodes library
+   * on the left. Zoom-to-fit keeps the workflow clear of them.
+   */
+  panelInsets: { top: number; right: number; bottom: number; left: number };
 }
 
 export const WORKFLOW_EDITOR_DEFAULTS: WorkflowEditorConfig = {
@@ -18,6 +24,7 @@ export const WORKFLOW_EDITOR_DEFAULTS: WorkflowEditorConfig = {
     zoomStep: 0.1,
   },
   gridSize: 18,
+  panelInsets: { top: 72, right: 72, bottom: 72, left: 340 },
 };
 
 /**
@@ -26,7 +33,8 @@ export const WORKFLOW_EDITOR_DEFAULTS: WorkflowEditorConfig = {
  */
 export function canvasFitPadding(config: WorkflowEditorConfig): [number, number, number, number] {
   const pad = config.viewport.zoomToFitPadding;
-  return [pad + 72, pad + 72, pad + 72, pad + 340];
+  const { top, right, bottom, left } = config.panelInsets;
+  return [pad + top, pad + right, pad + bottom, pad + left];
 }
 
 export const WORKFLOW_EDITOR_CONFIG = new InjectionToken<WorkflowEditorConfig>(

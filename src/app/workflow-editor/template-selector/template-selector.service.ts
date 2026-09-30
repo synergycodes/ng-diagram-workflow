@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgDiagramModelService, NgDiagramService, NgDiagramViewportService } from 'ng-diagram';
-import type { WorkflowTemplate } from '../diagram/templates';
+import { TEMPLATE_QUERY_PARAM, type WorkflowTemplate } from '../diagram/templates';
 import { ExecutionService } from '../execution/execution.service';
 import { ProjectNameService } from '../top-navbar/project-name.service';
 import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
@@ -17,6 +18,8 @@ export class TemplateSelectorService {
   private readonly projectName = inject(ProjectNameService);
   private readonly config = inject(WORKFLOW_EDITOR_CONFIG);
   private readonly execution = inject(ExecutionService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly isOpen = signal(false);
 
@@ -35,7 +38,7 @@ export class TemplateSelectorService {
     const { nodes, edges } = structuredClone(template?.model ?? { nodes: [], edges: [] });
     await this.diagram.transaction(
       async () => {
-        await this.modelService.deleteEdges(this.modelService.edges().map((e) => e.id));
+        // `deleteNodes` takes the connections of the deleted nodes with it.
         await this.modelService.deleteNodes(this.modelService.nodes().map((n) => n.id));
         await this.modelService.addNodes(nodes);
         await this.modelService.addEdges(edges);
@@ -44,10 +47,12 @@ export class TemplateSelectorService {
     );
     this.projectName.rename(template?.name ?? '');
     // Keep the choice in the URL so a reload (or a bookmark) opens the same template.
-    const url = new URL(location.href);
-    if (template) url.searchParams.set('template', template.id);
-    else url.searchParams.delete('template');
-    history.replaceState(history.state, '', url);
+    await this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { [TEMPLATE_QUERY_PARAM]: template?.id ?? null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
     if (nodes.length > 0) await this.viewport.zoomToFit({ padding: canvasFitPadding(this.config) });
   }
 }

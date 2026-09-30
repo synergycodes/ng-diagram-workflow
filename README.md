@@ -13,8 +13,8 @@ Features:
 - Eight node types, all described by one **data-driven catalog**
 - Custom node templates beyond the default card: **Decision** / **Approval** (one output port per branch) and **AI Agent** (shows the chosen chat model and memory)
 - **Properties panel** built with Angular **Signal Forms** — fields come from the catalog, can be shown or hidden depending on other values, and changes appear on the node card as you type
-- Labelled connections drawn as orthogonal edges with rounded corners; invalid connections are rejected (no self-loops, nothing can connect into a Trigger)
-- Graph rules in a **middleware**: a loop may only be drawn if a Decision or Approval can end it (reflection loops yes, endless agent ping-pong no)
+- Labelled connections drawn as orthogonal edges with rounded corners; invalid connections are rejected while they are drawn (no self-loops, nothing can connect into a Trigger)
+- Graph rule enforced twice: a loop may only close if a Decision or Approval can end it (reflection loops yes, endless agent ping-pong no). While drawing, `linking.validateConnection` refuses to snap; for the ways an edge arrives without being drawn (paste, template, programmatic edit) a **middleware** drops just the offending connections and says so in the navbar
 - **Run** a workflow on a **mocked backend**: each step's live status (running, waiting for approval, done, failed) and the path the flow took show on the canvas; Approval steps wait until someone picks Approved / Rejected on the node, and the canvas is locked by a second middleware while a run is in progress
 - Right-click **context menus** — copy / cut / paste / delete on a node, paste on the background
 - **Export** as JSON (nodes and connections) or as a JPEG snapshot of the canvas
@@ -66,22 +66,23 @@ Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads:
 
 ## ngDiagram APIs demonstrated
 
-| Concern               | API                                                                                         | Where in this repo                                    |
-| --------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Setup                 | `provideNgDiagram()`, `initializeModel()`                                                   | `pages/workflow-editor-page.component.ts`, `diagram/` |
-| Node templates        | `NgDiagramNodeTemplateMap`, `NgDiagramNodeTemplate`, `NgDiagramPortComponent`               | `diagram/nodes/*`                                     |
-| Dynamic ports         | one `ng-diagram-port` per decision branch                                                   | `diagram/nodes/decision-node/`                        |
-| Edge template + label | `NgDiagramEdgeTemplateMap`, `NgDiagramBaseEdgeComponent`, `NgDiagramBaseEdgeLabelComponent` | `diagram/edges/label-edge/`                           |
-| Connection rules      | `linking.validateConnection`, `finalEdgeDataBuilder`                                        | `diagram/diagram.component.ts`                        |
-| Graph rules           | `Middleware`, `createMiddlewares`, `[middlewares]` input                                    | `diagram/middlewares/`, `diagram/model/cycles.ts`     |
-| Live run status       | node / edge templates reading signals fed by a `WorkflowBackend` event stream               | `execution/`, `diagram/nodes/shared/node-status.*`    |
-| Routing, snapping     | `edgeRouting.orthogonal`, `snapping`, `background`                                          | `diagram/diagram.component.ts`                        |
-| Palette               | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                     | `palette-sidebar/components/palette-tile/`            |
-| Model updates         | `NgDiagramModelService.updateNodeData / updateEdgeData / deleteEdges`                       | `properties-sidebar/properties-sidebar.service.ts`    |
-| Replace the model     | `NgDiagramService.transaction({ waitForMeasurements })`, `addNodes / addEdges`, `zoomToFit` | `template-selector/template-selector.service.ts`      |
-| Selection             | `NgDiagramSelectionService`, `selectionGestureEnded`, `paletteItemDropped`                  | `properties-sidebar/`, `diagram/`                     |
-| Clipboard             | `NgDiagramClipboardService`                                                                 | `diagram/editor-actions.service.ts`                   |
-| Viewport, minimap     | `NgDiagramViewportService`, `NgDiagramMinimapComponent`                                     | `minimap-bar/`, `export/`                             |
+| Concern                 | API                                                                                            | Where in this repo                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Setup                   | `provideNgDiagram()`, `initializeModel()`                                                      | `pages/workflow-editor-page.component.ts`, `diagram/` |
+| Node templates          | `NgDiagramNodeTemplateMap`, `NgDiagramNodeTemplate`, `NgDiagramPortComponent`                  | `diagram/nodes/*`                                     |
+| Dynamic ports           | one `ng-diagram-port` per decision branch                                                      | `diagram/nodes/decision-node/`                        |
+| Edge template + label   | `NgDiagramEdgeTemplateMap`, `NgDiagramBaseEdgeComponent`, `NgDiagramBaseEdgeLabelComponent`    | `diagram/edges/label-edge/`                           |
+| Connection rules        | `linking.validateConnection`, `finalEdgeDataBuilder`                                           | `diagram/diagram.component.ts`                        |
+| Graph rules             | `Middleware`, `createMiddlewares`, `[middlewares]` input, `helpers`, `next({ edgesToRemove })` | `diagram/middlewares/`, `diagram/model/cycles.ts`     |
+| Read-only while running | `context.modelActionTypes` allow-list, `cancel()`                                              | `diagram/middlewares/run-lock.middleware.ts`          |
+| Live run status         | node / edge templates reading signals fed by a `WorkflowBackend` event stream                  | `execution/`, `diagram/nodes/shared/node-status.*`    |
+| Routing, snapping       | `edgeRouting.orthogonal`, `snapping`, `background`                                             | `diagram/diagram.component.ts`                        |
+| Palette                 | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                        | `palette-sidebar/components/palette-tile/`            |
+| Model updates           | `NgDiagramModelService.updateNodeData / updateEdgeData / deleteEdges`                          | `properties-sidebar/properties-sidebar.service.ts`    |
+| Replace the model       | `NgDiagramService.transaction({ waitForMeasurements })`, `addNodes / addEdges`, `zoomToFit`    | `template-selector/template-selector.service.ts`      |
+| Selection               | `NgDiagramSelectionService`, `selectionGestureEnded`, `paletteItemDropped`                     | `properties-sidebar/`, `diagram/`                     |
+| Clipboard               | `NgDiagramClipboardService`                                                                    | `diagram/editor-actions.service.ts`                   |
+| Viewport, minimap       | `NgDiagramViewportService`, `NgDiagramMinimapComponent`                                        | `minimap-bar/`, `export/`                             |
 
 ## Architecture
 
@@ -98,9 +99,10 @@ src/
     │   ├── templates/                # seed workflows: order flow + one per AI pattern
     │   ├── editor-actions.service.ts # copy / cut / paste / delete
     │   ├── model/                    # types, node catalog, field model, guards, cycle check (+ specs)
-    │   ├── middlewares/              # graph rules run on every model change
+    │   ├── middlewares/              # graph + run-lock rules on every model change (+ specs)
     │   ├── nodes/                    # workflow, decision, ai-agent templates + shared header/icon
     │   └── edges/label-edge/         # labelled edge template
+    ├── editor-notice.service.ts      # short navbar messages for what the editor refused to do
     ├── execution/                    # WorkflowBackend contract, mock backend, run state (+ spec)
     ├── palette-sidebar/              # Nodes Library + draggable tiles
     ├── template-selector/            # "Select a template" dialog, swaps the model in place

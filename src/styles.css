@@ -66,6 +66,24 @@ h6 {
   overflow-wrap: break-word;
 }
 
+/* Outlined button: the editor's default control (navbar Run / Stop, Templates).
+   Global, because every panel component would otherwise repeat the same block. */
+.wf-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--wf-stroke);
+  border-radius: var(--wf-radius-md);
+  background: var(--wf-bg-panel);
+  color: var(--wf-text-primary);
+  cursor: pointer;
+}
+
+.wf-button:hover {
+  background: var(--wf-bg-secondary);
+}
+
 /* Mask-based icon for the few custom SVGs (Phosphor covers the rest via
    `ph ph-*` classes). Set `--icon-url` and size on the element. */
 .mask-icon {

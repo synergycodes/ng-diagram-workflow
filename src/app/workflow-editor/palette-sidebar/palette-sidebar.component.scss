@@ -118,22 +118,11 @@
   border-top: 1px solid var(--wf-stroke);
 }
 
+/* `.wf-button` (global) carries the look; only the full-width layout differs. */
 .templates-button {
-  display: inline-flex;
   width: 100%;
-  align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 8px 12px;
-  border: 1px solid var(--wf-stroke);
-  border-radius: 8px;
-  background: var(--wf-bg-panel);
-  color: var(--wf-text-primary);
-  cursor: pointer;
-
-  &:hover {
-    background: var(--wf-bg-secondary);
-  }
 }
 
 .empty {

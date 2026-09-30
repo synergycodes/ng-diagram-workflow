@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {
   createMiddlewares,
   initializeModel,
@@ -16,18 +17,20 @@ import {
   type SelectionGestureEndedEvent,
 } from 'ng-diagram';
 import { ContextMenuService } from '../context-menu/context-menu.service';
+import { EditorNoticeService } from '../editor-notice.service';
 import { ExecutionService } from '../execution/execution.service';
 import { PaletteDragService } from '../palette-sidebar/palette-drag.service';
 import { PropertiesSidebarService } from '../properties-sidebar/properties-sidebar.service';
 import { ProjectNameService } from '../top-navbar/project-name.service';
 import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 import { LabelEdgeComponent } from './edges/label-edge/label-edge.component';
-import { cycleExitMiddleware } from './middlewares/cycle-exit.middleware';
+import { createCycleExitMiddleware } from './middlewares/cycle-exit.middleware';
 import { createRunLockMiddleware } from './middlewares/run-lock.middleware';
+import { createsCycleWithoutExit } from './model/cycles';
 import { isStartNode } from './model/guards';
 import { LABEL_EDGE_TYPE } from './model/workflow-types';
 import { NODE_TEMPLATE_COMPONENTS } from './nodes/node-templates';
-import { initialTemplate } from './templates';
+import { templateById, TEMPLATE_QUERY_PARAM } from './templates';
 
 /**
  * Workflow editor canvas.
@@ -51,12 +54,17 @@ export class DiagramComponent {
   private readonly contextMenu = inject(ContextMenuService);
   private readonly paletteDrag = inject(PaletteDragService);
   private readonly execution = inject(ExecutionService);
+  private readonly notice = inject(EditorNoticeService);
 
   private readonly grid = { width: this.config.gridSize, height: this.config.gridSize };
 
   diagramConfig = {
     linking: {
-      // Workflows flow forward: no self-loops and nothing may enter a start node.
+      // Checked while the connection is being drawn, so an invalid target
+      // simply refuses to snap: workflows flow forward (no self-loops, nothing
+      // enters a start node) and a loop needs a Decision or an Approval to end
+      // it. The graph rule runs as middleware too, for the ways an edge can
+      // appear without being drawn.
       validateConnection: (
         source: Node | null,
         sourcePort: Port | null,
@@ -65,7 +73,8 @@ export class DiagramComponent {
       ) => {
         if (!source || !target || !sourcePort || !targetPort) return false;
         if (source.id === target.id) return false;
-        return !isStartNode(target);
+        if (isStartNode(target)) return false;
+        return !this.closesEndlessLoop(source.id, target.id);
       },
       // Every drawn connection becomes a label edge without arrowheads.
       temporaryEdgeDataBuilder: withLabelEdge,
@@ -96,7 +105,7 @@ export class DiagramComponent {
   // Graph-level rules run as middleware on every model change.
   middlewares = createMiddlewares((defaults) => [
     ...defaults,
-    cycleExitMiddleware,
+    createCycleExitMiddleware((message) => this.notice.report(message)),
     createRunLockMiddleware(() => this.execution.isRunning()),
   ]);
 
@@ -104,7 +113,9 @@ export class DiagramComponent {
   edgeTemplateMap = new NgDiagramEdgeTemplateMap([[LABEL_EDGE_TYPE, LabelEdgeComponent]]);
 
   // `?template=<id>` picks the starting workflow; the default is the order flow.
-  private readonly template = initialTemplate();
+  private readonly template = templateById(
+    inject(ActivatedRoute).snapshot.queryParamMap.get(TEMPLATE_QUERY_PARAM),
+  );
   model = initializeModel(structuredClone(this.template.model));
 
   constructor() {
@@ -136,6 +147,12 @@ export class DiagramComponent {
     if (event.nodes.length > 0 || event.edges.length > 0) {
       this.sidebarService.expandSidebar();
     }
+  }
+
+  /** True when connecting `source` to `target` would close a loop nothing can end. */
+  private closesEndlessLoop(source: string, target: string): boolean {
+    const nodes = new Map(this.modelService.nodes().map((node) => [node.id, node]));
+    return createsCycleWithoutExit(nodes, this.modelService.edges(), { source, target });
   }
 
   /** Right-click on empty canvas → background context menu (paste only). */

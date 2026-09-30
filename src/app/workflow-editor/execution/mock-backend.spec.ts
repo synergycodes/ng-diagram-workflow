@@ -87,6 +87,16 @@ describe('MockWorkflowBackend', () => {
     expect(run.finished()).toEqual({ type: 'finished', outcome: 'succeeded' });
   });
 
+  it('fails a run with nothing to start from instead of reporting success', () => {
+    const run = start({
+      nodes: [createNode('a', Action, { x: 0, y: 0 }), createNode('b', Action, { x: 0, y: 0 })],
+      edges: [edge('a', 'out', 'b'), edge('b', 'out', 'a')],
+    });
+    vi.runAllTimers();
+    expect(run.statuses('a')).toEqual([]);
+    expect(run.finished()).toEqual({ type: 'finished', outcome: 'failed' });
+  });
+
   it('fails a step with simulateFailure, or retries it once when allowed', () => {
     const failing = (retryOnFailure: boolean) =>
       start({

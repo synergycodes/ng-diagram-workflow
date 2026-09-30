@@ -81,7 +81,15 @@ class MockRun {
 
   begin(): void {
     const targets = new Set(this.doc.connections.map((c) => c.target));
-    this.doc.nodes.filter((node) => !targets.has(node.id)).forEach((node) => this.enter(node));
+    const starts = this.doc.nodes.filter((node) => !targets.has(node.id));
+    // Nothing the flow could start from: an empty document, or every step has
+    // something wired into it. Reporting success would be a lie — no step ran.
+    if (starts.length === 0) {
+      this.failed = true;
+      this.checkDone();
+      return;
+    }
+    starts.forEach((node) => this.enter(node));
     this.checkDone();
   }
 
@@ -92,8 +100,8 @@ class MockRun {
   }
 
   decide(nodeId: string, branchId: string): void {
-    if (!this.waitingForPerson.delete(nodeId)) return;
-    const node = this.nodes.get(nodeId)!;
+    const node = this.nodes.get(nodeId);
+    if (!node || !this.waitingForPerson.delete(nodeId)) return;
     const branch = node.branches?.find((b) => b.id === branchId);
     this.emit({ type: 'node', nodeId, status: 'succeeded', message: branch?.label });
     this.follow(this.outgoing(nodeId, branchPortId(branchId)));
