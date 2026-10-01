@@ -15,6 +15,7 @@ Features:
 - **Properties panel** built with Angular **Signal Forms** — fields come from the catalog, can be shown or hidden depending on other values, and changes appear on the node card as you type
 - Labelled connections drawn as orthogonal edges with rounded corners; invalid connections are rejected while they are drawn (no self-loops, nothing can connect into a Trigger)
 - Graph rule enforced twice: a loop may only close if a Decision or Approval can end it (reflection loops yes, endless agent ping-pong no). While drawing, `linking.validateConnection` refuses to snap; for the ways an edge arrives without being drawn (paste, template, programmatic edit) a **middleware** drops just the offending connections and says so in the navbar
+- A workflow starts in one place: a **middleware** cancels any drop or paste that would add a second Trigger and says so in the navbar
 - **Run** a workflow on a **mocked backend**: each step's live status (running, waiting for approval, done, failed) and the path the flow took show on the canvas; Approval steps wait until someone picks Approved / Rejected on the node, and the canvas is locked by a second middleware while a run is in progress
 - Right-click **context menus** — copy / cut / paste / delete on a node, paste on the background
 - **Export** as JSON (nodes and connections) or as a JPEG snapshot of the canvas

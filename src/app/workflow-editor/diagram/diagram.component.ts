@@ -23,6 +23,7 @@ import { TemplateSelectorService } from '../template-selector/template-selector.
 import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 import { LabelEdgeComponent } from './edges/label-edge/label-edge.component';
 import { createCycleExitMiddleware } from './middlewares/cycle-exit.middleware';
+import { createOneTriggerMiddleware } from './middlewares/one-trigger.middleware';
 import { createRunLockMiddleware } from './middlewares/run-lock.middleware';
 import { createsCycleWithoutExit } from './model/cycles';
 import { isStartNode } from './model/guards';
@@ -100,9 +101,11 @@ export class DiagramComponent {
   } satisfies NgDiagramConfig;
 
   // Graph-level rules run as middleware on every model change. The run lock
-  // goes first, so an edit it cancels never reaches the other middlewares.
+  // goes first, so an edit it cancels never reaches the other middlewares. The
+  // one-Trigger check is validation, so it runs before the defaults do any work.
   middlewares = createMiddlewares((defaults) => [
     createRunLockMiddleware(() => this.execution.isRunning()),
+    createOneTriggerMiddleware((message) => this.notice.report(message)),
     ...defaults,
     createCycleExitMiddleware((message) => this.notice.report(message)),
   ]);
