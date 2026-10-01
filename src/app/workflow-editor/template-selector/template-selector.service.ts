@@ -1,14 +1,20 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgDiagramModelService, NgDiagramService, NgDiagramViewportService } from 'ng-diagram';
-import { TEMPLATE_QUERY_PARAM, type WorkflowTemplate } from '../diagram/templates';
+import {
+  initializeModel,
+  NgDiagramModelService,
+  NgDiagramService,
+  NgDiagramViewportService,
+} from 'ng-diagram';
+import { templateById, TEMPLATE_QUERY_PARAM, type WorkflowTemplate } from '../diagram/templates';
 import { ExecutionService } from '../execution/execution.service';
 import { ProjectNameService } from '../top-navbar/project-name.service';
 import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 
 /**
- * Opens the "Select a template" dialog and swaps the canvas for the picked
- * template in place (like Workflow Builder: no reload, no confirmation).
+ * Owns the workflow on the canvas: the template it starts from (`?template=<id>`,
+ * the order flow by default) and the "Select a template" dialog that swaps it
+ * for another one in place (like Workflow Builder: no reload, no confirmation).
  */
 @Injectable()
 export class TemplateSelectorService {
@@ -21,7 +27,18 @@ export class TemplateSelectorService {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
+  private readonly initial = templateById(
+    this.route.snapshot.queryParamMap.get(TEMPLATE_QUERY_PARAM),
+  );
+
+  /** The model the canvas starts with; `load` replaces its contents. */
+  readonly model = initializeModel(structuredClone(this.initial.model));
+
   readonly isOpen = signal(false);
+
+  constructor() {
+    this.projectName.rename(this.initial.name);
+  }
 
   open(): void {
     this.isOpen.set(true);
@@ -36,12 +53,16 @@ export class TemplateSelectorService {
     this.close();
     this.execution.reset();
     const { nodes, edges } = structuredClone(template?.model ?? { nodes: [], edges: [] });
+    // Cleared in its own update: a transaction applies additions before removals,
+    // so nodes whose ids are already on the canvas (the same template picked
+    // again) would be added and then removed. `deleteNodes` takes their
+    // connections with them.
+    const current = this.modelService.nodes().map((node) => node.id);
+    if (current.length > 0) await this.modelService.deleteNodes(current);
     await this.diagram.transaction(
-      async () => {
-        // `deleteNodes` takes the connections of the deleted nodes with it.
-        await this.modelService.deleteNodes(this.modelService.nodes().map((n) => n.id));
-        await this.modelService.addNodes(nodes);
-        await this.modelService.addEdges(edges);
+      () => {
+        this.modelService.addNodes(nodes);
+        this.modelService.addEdges(edges);
       },
       { waitForMeasurements: true },
     );

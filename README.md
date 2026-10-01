@@ -66,23 +66,23 @@ Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads:
 
 ## ngDiagram APIs demonstrated
 
-| Concern                 | API                                                                                            | Where in this repo                                    |
-| ----------------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Setup                   | `provideNgDiagram()`, `initializeModel()`                                                      | `pages/workflow-editor-page.component.ts`, `diagram/` |
-| Node templates          | `NgDiagramNodeTemplateMap`, `NgDiagramNodeTemplate`, `NgDiagramPortComponent`                  | `diagram/nodes/*`                                     |
-| Dynamic ports           | one `ng-diagram-port` per decision branch                                                      | `diagram/nodes/decision-node/`                        |
-| Edge template + label   | `NgDiagramEdgeTemplateMap`, `NgDiagramBaseEdgeComponent`, `NgDiagramBaseEdgeLabelComponent`    | `diagram/edges/label-edge/`                           |
-| Connection rules        | `linking.validateConnection`, `finalEdgeDataBuilder`                                           | `diagram/diagram.component.ts`                        |
-| Graph rules             | `Middleware`, `createMiddlewares`, `[middlewares]` input, `helpers`, `next({ edgesToRemove })` | `diagram/middlewares/`, `diagram/model/cycles.ts`     |
-| Read-only while running | `context.modelActionTypes` allow-list, `cancel()`                                              | `diagram/middlewares/run-lock.middleware.ts`          |
-| Live run status         | node / edge templates reading signals fed by a `WorkflowBackend` event stream                  | `execution/`, `diagram/nodes/shared/node-status.*`    |
-| Routing, snapping       | `edgeRouting.orthogonal`, `snapping`, `background`                                             | `diagram/diagram.component.ts`                        |
-| Palette                 | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                        | `palette-sidebar/components/palette-tile/`            |
-| Model updates           | `NgDiagramModelService.updateNodeData / updateEdgeData / deleteEdges`                          | `properties-sidebar/properties-sidebar.service.ts`    |
-| Replace the model       | `NgDiagramService.transaction({ waitForMeasurements })`, `addNodes / addEdges`, `zoomToFit`    | `template-selector/template-selector.service.ts`      |
-| Selection               | `NgDiagramSelectionService`, `selectionGestureEnded`, `paletteItemDropped`                     | `properties-sidebar/`, `diagram/`                     |
-| Clipboard               | `NgDiagramClipboardService`                                                                    | `diagram/editor-actions.service.ts`                   |
-| Viewport, minimap       | `NgDiagramViewportService`, `NgDiagramMinimapComponent`                                        | `minimap-bar/`, `export/`                             |
+| Concern                 | API                                                                                            | Where in this repo                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Setup                   | `provideNgDiagram()`, `initializeModel()`                                                      | `pages/workflow-editor-page.component.ts`, `template-selector/` |
+| Node templates          | `NgDiagramNodeTemplateMap`, `NgDiagramNodeTemplate`, `NgDiagramPortComponent`                  | `diagram/nodes/*`                                               |
+| Dynamic ports           | one `ng-diagram-port` per decision branch                                                      | `diagram/nodes/decision-node/`                                  |
+| Edge template + label   | `NgDiagramEdgeTemplateMap`, `NgDiagramBaseEdgeComponent`, `NgDiagramBaseEdgeLabelComponent`    | `diagram/edges/label-edge/`                                     |
+| Connection rules        | `linking.validateConnection`, `finalEdgeDataBuilder`                                           | `diagram/diagram.component.ts`                                  |
+| Graph rules             | `Middleware`, `createMiddlewares`, `[middlewares]` input, `helpers`, `next({ edgesToRemove })` | `diagram/middlewares/`, `diagram/model/cycles.ts`               |
+| Read-only while running | `context.modelActionTypes` allow-list, `cancel()`                                              | `diagram/middlewares/run-lock.middleware.ts`                    |
+| Live run status         | node / edge templates reading signals fed by a `WorkflowBackend` event stream                  | `execution/`, `diagram/nodes/shared/node-status.*`              |
+| Routing, snapping       | `edgeRouting.orthogonal`, `snapping`, `background`                                             | `diagram/diagram.component.ts`                                  |
+| Palette                 | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                        | `palette-sidebar/components/palette-tile/`                      |
+| Model updates           | `NgDiagramModelService.updateNodeData / updateEdgeData / deleteEdges`                          | `properties-sidebar/properties-sidebar.service.ts`              |
+| Replace the model       | `deleteNodes`, `transaction({ waitForMeasurements })`, `addNodes / addEdges`, `zoomToFit`      | `template-selector/template-selector.service.ts`                |
+| Selection               | `NgDiagramSelectionService`, `selectionGestureEnded`, `paletteItemDropped`                     | `properties-sidebar/`, `diagram/`                               |
+| Clipboard               | `NgDiagramClipboardService`                                                                    | `diagram/editor-actions.service.ts`                             |
+| Viewport, minimap       | `NgDiagramViewportService`, `NgDiagramMinimapComponent`                                        | `minimap-bar/`, `export/`                                       |
 
 ## Architecture
 
@@ -105,7 +105,7 @@ src/
     ├── editor-notice.service.ts      # short navbar messages for what the editor refused to do
     ├── execution/                    # WorkflowBackend contract, mock backend, run state (+ spec)
     ├── palette-sidebar/              # Nodes Library + draggable tiles
-    ├── template-selector/            # "Select a template" dialog, swaps the model in place
+    ├── template-selector/            # starting template + "Select a template" dialog, swaps the model in place
     ├── properties-sidebar/           # panel, Signal Forms for nodes / edges, icon select control
     ├── minimap-bar/                  # zoom stepper + minimap popover
     ├── context-menu/                 # node / background right-click menu

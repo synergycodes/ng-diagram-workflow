@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
   createMiddlewares,
-  initializeModel,
   NgDiagramBackgroundComponent,
   NgDiagramComponent,
   NgDiagramEdgeTemplateMap,
@@ -21,7 +19,7 @@ import { EditorNoticeService } from '../editor-notice.service';
 import { ExecutionService } from '../execution/execution.service';
 import { PaletteDragService } from '../palette-sidebar/palette-drag.service';
 import { PropertiesSidebarService } from '../properties-sidebar/properties-sidebar.service';
-import { ProjectNameService } from '../top-navbar/project-name.service';
+import { TemplateSelectorService } from '../template-selector/template-selector.service';
 import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 import { LabelEdgeComponent } from './edges/label-edge/label-edge.component';
 import { createCycleExitMiddleware } from './middlewares/cycle-exit.middleware';
@@ -30,7 +28,6 @@ import { createsCycleWithoutExit } from './model/cycles';
 import { isStartNode } from './model/guards';
 import { LABEL_EDGE_TYPE } from './model/workflow-types';
 import { NODE_TEMPLATE_COMPONENTS } from './nodes/node-templates';
-import { templateById, TEMPLATE_QUERY_PARAM } from './templates';
 
 /**
  * Workflow editor canvas.
@@ -112,15 +109,8 @@ export class DiagramComponent {
   nodeTemplateMap = new NgDiagramNodeTemplateMap(Object.entries(NODE_TEMPLATE_COMPONENTS));
   edgeTemplateMap = new NgDiagramEdgeTemplateMap([[LABEL_EDGE_TYPE, LabelEdgeComponent]]);
 
-  // `?template=<id>` picks the starting workflow; the default is the order flow.
-  private readonly template = templateById(
-    inject(ActivatedRoute).snapshot.queryParamMap.get(TEMPLATE_QUERY_PARAM),
-  );
-  model = initializeModel(structuredClone(this.template.model));
-
-  constructor() {
-    inject(ProjectNameService).rename(this.template.name);
-  }
+  // The workflow to show: the starting template, then whatever the template picker loads.
+  model = inject(TemplateSelectorService).model;
 
   /**
    * Align a freshly dropped node with the drag preview (centred on the cursor),
