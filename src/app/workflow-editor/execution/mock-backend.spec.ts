@@ -7,7 +7,7 @@ import {
   reflectionLoopTemplate,
   routingTemplate,
 } from '../diagram/templates/ai-patterns';
-import type { WorkflowTemplate } from '../diagram/templates';
+import type { WorkflowModel } from '../diagram/templates';
 import { edge } from '../diagram/templates/workflow-template';
 import type { RunEvent } from './execution-types';
 import { MockWorkflowBackend } from './mock-backend';
@@ -15,7 +15,7 @@ import { toWorkflowDocument } from './workflow-document';
 
 const { Action, AiAgent, Trigger } = WorkflowNodeKind;
 
-function start(model: WorkflowTemplate['model'], random = 0.5) {
+function start(model: WorkflowModel, random = 0.5) {
   const backend = new MockWorkflowBackend();
   backend.random = () => random;
   const events: RunEvent[] = [];

@@ -12,23 +12,29 @@ export interface WorkflowDocument {
   version: 1;
   name: string;
   generatedAt: string;
-  nodes: {
-    id: string;
-    kind: string;
-    position: Point;
-    label: string;
-    description: string;
-    properties: Record<string, PropertyValue>;
-    branches?: DecisionBranch[];
-  }[];
-  connections: {
-    id: string;
-    source: string;
-    sourcePort?: string;
-    target: string;
-    targetPort?: string;
-    label?: string;
-  }[];
+  nodes: WorkflowStep[];
+  connections: WorkflowConnection[];
+}
+
+/** One step of the workflow: a node with its kind-specific settings. */
+export interface WorkflowStep {
+  id: string;
+  kind: string;
+  position: Point;
+  label: string;
+  description: string;
+  properties: Record<string, PropertyValue>;
+  branches?: DecisionBranch[];
+}
+
+/** A connection from a port of one step into another step. */
+export interface WorkflowConnection {
+  id: string;
+  source: string;
+  sourcePort?: string;
+  target: string;
+  targetPort?: string;
+  label?: string;
 }
 
 /** Build the document for the given diagram contents. */

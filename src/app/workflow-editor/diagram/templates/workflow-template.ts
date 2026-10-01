@@ -1,4 +1,4 @@
-import type { Edge, Node } from 'ng-diagram';
+import type { Edge, Node, Point } from 'ng-diagram';
 import {
   LABEL_EDGE_TYPE,
   PORT_IN,
@@ -12,7 +12,18 @@ export interface WorkflowTemplate {
   name: string;
   /** Icon reference, see `NodeIconComponent` for the accepted formats. */
   icon: string;
-  model: { nodes: Node<WorkflowNodeData>[]; edges: Edge<WorkflowEdgeData>[] };
+  model: WorkflowModel;
+}
+
+/** The nodes and edges of a workflow, as the diagram model holds them. */
+export interface WorkflowModel {
+  nodes: Node<WorkflowNodeData>[];
+  edges: Edge<WorkflowEdgeData>[];
+}
+
+/** A node position on the canvas; keeps seed nodes short in `createNode` calls. */
+export function at(x: number, y: number): Point {
+  return { x, y };
 }
 
 /** A label edge from a node's output port into another node's input port. */

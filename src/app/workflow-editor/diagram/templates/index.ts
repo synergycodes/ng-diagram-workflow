@@ -8,7 +8,7 @@ import {
 import { orderConfirmationTemplate } from './order-confirmation';
 import type { WorkflowTemplate } from './workflow-template';
 
-export type { WorkflowTemplate } from './workflow-template';
+export type { WorkflowModel, WorkflowTemplate } from './workflow-template';
 
 /** Query param that deep-links a template (`?template=<id>`). */
 export const TEMPLATE_QUERY_PARAM = 'template';

@@ -7,82 +7,47 @@ import {
   type WorkflowEdgeData,
   type WorkflowNodeData,
 } from '../model/workflow-types';
-import { edge, type WorkflowTemplate } from './workflow-template';
+import { at, edge, type WorkflowTemplate } from './workflow-template';
 
 const nodes: Node<WorkflowNodeData>[] = [
-  createNode(
-    'trigger',
-    WorkflowNodeKind.Trigger,
-    { x: 0, y: 162 },
-    {
-      label: 'New order placed',
-      description: 'Starts on every checkout',
-      properties: { type: 'eventBasedTrigger', eventMatcher: 'order.created' },
-    },
-  ),
-  createNode(
-    'confirm-email',
-    WorkflowNodeKind.Action,
-    { x: 342, y: 162 },
-    {
-      label: 'Send confirmation',
-      description: 'Email the order summary',
-      properties: { type: 'sendEmail', sendTo: '{{customer.email}}', subject: 'Thanks!' },
-    },
-  ),
-  createNode(
-    'order-value',
-    WorkflowNodeKind.Decision,
-    { x: 684, y: 126 },
-    {
-      label: 'Order value',
-      description: 'Route by basket total',
-      branches: [
-        { id: 'vip', label: 'Total above $500' },
-        { id: 'regular', label: 'Everything else' },
-      ],
-    },
-  ),
-  createNode(
-    'notify-sales',
-    WorkflowNodeKind.Notification,
-    { x: 1026, y: 0 },
-    {
-      label: 'Notify sales team',
-      description: 'Ping the account manager',
-      properties: { type: 'slackMessage', recipient: '#vip-orders' },
-    },
-  ),
-  createNode(
-    'wait',
-    WorkflowNodeKind.Delay,
-    { x: 1026, y: 288 },
-    {
-      label: 'Wait 2 days',
-      description: 'Give the parcel time to arrive',
-      properties: { delayMs: '172800000' },
-    },
-  ),
-  createNode(
-    'draft-follow-up',
-    WorkflowNodeKind.AiAgent,
-    { x: 1368, y: 234 },
-    {
-      label: 'Draft follow-up',
-      description: 'Write a personal review request',
-      properties: { chatModel: 'claudeSonnet4.6', memory: 'system' },
-    },
-  ),
-  createNode(
-    'follow-up-email',
-    WorkflowNodeKind.Action,
-    { x: 1710, y: 288 },
-    {
-      label: 'Send follow-up',
-      description: 'Ask for a product review',
-      properties: { type: 'sendEmail', sendTo: '{{customer.email}}' },
-    },
-  ),
+  createNode('trigger', WorkflowNodeKind.Trigger, at(0, 162), {
+    label: 'New order placed',
+    description: 'Starts on every checkout',
+    properties: { type: 'eventBasedTrigger', eventMatcher: 'order.created' },
+  }),
+  createNode('confirm-email', WorkflowNodeKind.Action, at(342, 162), {
+    label: 'Send confirmation',
+    description: 'Email the order summary',
+    properties: { type: 'sendEmail', sendTo: '{{customer.email}}', subject: 'Thanks!' },
+  }),
+  createNode('order-value', WorkflowNodeKind.Decision, at(684, 126), {
+    label: 'Order value',
+    description: 'Route by basket total',
+    branches: [
+      { id: 'vip', label: 'Total above $500' },
+      { id: 'regular', label: 'Everything else' },
+    ],
+  }),
+  createNode('notify-sales', WorkflowNodeKind.Notification, at(1026, 0), {
+    label: 'Notify sales team',
+    description: 'Ping the account manager',
+    properties: { type: 'slackMessage', recipient: '#vip-orders' },
+  }),
+  createNode('wait', WorkflowNodeKind.Delay, at(1026, 288), {
+    label: 'Wait 2 days',
+    description: 'Give the parcel time to arrive',
+    properties: { delayMs: '172800000' },
+  }),
+  createNode('draft-follow-up', WorkflowNodeKind.AiAgent, at(1368, 234), {
+    label: 'Draft follow-up',
+    description: 'Write a personal review request',
+    properties: { chatModel: 'claudeSonnet4.6', memory: 'system' },
+  }),
+  createNode('follow-up-email', WorkflowNodeKind.Action, at(1710, 288), {
+    label: 'Send follow-up',
+    description: 'Ask for a product review',
+    properties: { type: 'sendEmail', sendTo: '{{customer.email}}' },
+  }),
 ];
 
 const edges: Edge<WorkflowEdgeData>[] = [

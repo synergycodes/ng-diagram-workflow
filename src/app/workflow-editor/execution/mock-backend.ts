@@ -2,10 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, type Subscriber } from 'rxjs';
 import { branchPortId, PORT_OUT, WorkflowNodeKind } from '../diagram/model/workflow-types';
 import { WorkflowBackend, type RunEvent } from './execution-types';
-import type { WorkflowDocument } from './workflow-document';
-
-type DocNode = WorkflowDocument['nodes'][number];
-type Connection = WorkflowDocument['connections'][number];
+import type { WorkflowConnection, WorkflowDocument, WorkflowStep } from './workflow-document';
 
 /** Simulated time each kind of step takes (ms). */
 const DURATION: Partial<Record<string, number>> = {
@@ -61,7 +58,7 @@ export class MockWorkflowBackend extends WorkflowBackend {
 }
 
 class MockRun {
-  private readonly nodes: Map<string, DocNode>;
+  private readonly nodes: Map<string, WorkflowStep>;
   private readonly timers = new Set<ReturnType<typeof setTimeout>>();
   private readonly visits = new Map<string, number>();
   private readonly arrivals = new Map<string, number>();
@@ -108,7 +105,7 @@ class MockRun {
     this.checkDone();
   }
 
-  private enter(node: DocNode): void {
+  private enter(node: WorkflowStep): void {
     if (node.kind === WorkflowNodeKind.Merge) {
       const total = this.incoming(node.id).length;
       const arrived = (this.arrivals.get(node.id) ?? 0) + 1;
@@ -134,7 +131,7 @@ class MockRun {
     this.schedule(this.duration(node), () => this.complete(node));
   }
 
-  private complete(node: DocNode): void {
+  private complete(node: WorkflowStep): void {
     if (node.properties['simulateFailure'] === true) {
       const canRetry = node.properties['retryOnFailure'] === true && !this.retried.has(node.id);
       if (!canRetry) {
@@ -172,30 +169,32 @@ class MockRun {
     this.succeed(node);
   }
 
-  private succeed(node: DocNode): void {
+  private succeed(node: WorkflowStep): void {
     this.emit({ type: 'node', nodeId: node.id, status: 'succeeded' });
     this.follow(this.outgoing(node.id, PORT_OUT));
   }
 
   /** Loop back once if a branch leads to a step already run, else take the first forward branch. */
-  private chooseBranch(node: DocNode) {
+  private chooseBranch(node: WorkflowStep) {
     const wired = (node.branches ?? [])
       .map((branch) => ({ branch, edges: this.outgoing(node.id, branchPortId(branch.id)) }))
       .filter(({ edges }) => edges.length > 0);
-    const loopsBack = ({ edges }: (typeof wired)[number]) =>
+    const loopsBack = (edges: WorkflowConnection[]) =>
       edges.some((edge) => this.visits.has(edge.target));
 
-    const loop = wired.find((w) => loopsBack(w) && !this.loopsTaken.has(w.branch.id + node.id));
+    const loop = wired.find(
+      (w) => loopsBack(w.edges) && !this.loopsTaken.has(w.branch.id + node.id),
+    );
     if (loop) {
       this.loopsTaken.add(loop.branch.id + node.id);
       return loop.branch;
     }
-    const forward = wired.filter((w) => !loopsBack(w));
+    const forward = wired.filter((w) => !loopsBack(w.edges));
     const options = forward.length > 0 ? forward : wired;
     return options[0]?.branch;
   }
 
-  private follow(edges: Connection[]): void {
+  private follow(edges: WorkflowConnection[]): void {
     for (const edge of edges) {
       this.emit({ type: 'edge', edgeId: edge.id });
       const target = this.nodes.get(edge.target);
@@ -230,7 +229,7 @@ class MockRun {
     this.out.complete();
   }
 
-  private duration(node: DocNode): number {
+  private duration(node: WorkflowStep): number {
     const base =
       node.kind === WorkflowNodeKind.Delay
         ? Math.min(Number(node.properties['delayMs']) || 0, 2000)
@@ -238,11 +237,11 @@ class MockRun {
     return Math.max(300, Math.round(base * (0.8 + this.random() * 0.4)));
   }
 
-  private outgoing(nodeId: string, port: string): Connection[] {
+  private outgoing(nodeId: string, port: string): WorkflowConnection[] {
     return this.doc.connections.filter((c) => c.source === nodeId && c.sourcePort === port);
   }
 
-  private incoming(nodeId: string): Connection[] {
+  private incoming(nodeId: string): WorkflowConnection[] {
     return this.doc.connections.filter((c) => c.target === nodeId);
   }
 
