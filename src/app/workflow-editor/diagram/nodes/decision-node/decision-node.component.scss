@@ -7,9 +7,9 @@
   left: calc(100% + 1.125rem + 3px);
 }
 
-/* Waiting for a person: each branch row is a button. */
+/* Waiting for a person: each branch row is a button, in the run status colour. */
 .item.choice {
-  border-color: var(--wf-status-waiting);
+  border-color: var(--run-status-color);
   border-style: dashed;
 }
 
@@ -18,7 +18,6 @@
   border: none;
   background: none;
   color: inherit;
-  font: inherit;
   text-align: left;
   cursor: pointer;
 
@@ -32,5 +31,5 @@
 
 .item.choice:hover {
   border-style: solid;
-  background: color-mix(in srgb, var(--wf-status-waiting) 15%, var(--wf-bg-tertiary));
+  background: color-mix(in srgb, var(--run-status-color) 15%, var(--wf-bg-tertiary));
 }

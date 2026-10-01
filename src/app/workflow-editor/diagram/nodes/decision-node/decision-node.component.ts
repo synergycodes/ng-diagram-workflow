@@ -6,13 +6,13 @@ import {
   type Node,
 } from 'ng-diagram';
 import { ExecutionService } from '../../../execution/execution.service';
-import { NODE_CATALOG, selectedOption } from '../../model/node-catalog';
+import { NODE_CATALOG } from '../../model/node-catalog';
 import { branchPortId, PORT_IN, type WorkflowNodeData } from '../../model/workflow-types';
 import { NodeContextMenuDirective } from '../shared/node-context-menu.directive';
 import { NodeHeaderComponent } from '../shared/node-header.component';
 import { NodeRunStatusDirective } from '../shared/node-run-status.directive';
 import { NodeStatusComponent } from '../shared/node-status.component';
-import { NodeIconComponent } from '../shared/node-icon.component';
+import { NodeSummaryComponent } from '../shared/node-summary.component';
 
 /**
  * Branching card used by Decision and Approval: routes the flow into one of
@@ -27,7 +27,7 @@ import { NodeIconComponent } from '../shared/node-icon.component';
     NgDiagramPortComponent,
     NodeHeaderComponent,
     NodeStatusComponent,
-    NodeIconComponent,
+    NodeSummaryComponent,
   ],
   templateUrl: './decision-node.component.html',
   styleUrl: './decision-node.component.scss',
@@ -41,8 +41,8 @@ import { NodeIconComponent } from '../shared/node-icon.component';
 export class DecisionNodeComponent implements NgDiagramNodeTemplate<WorkflowNodeData> {
   readonly node = input.required<Node<WorkflowNodeData>>();
 
-  private readonly execution = inject(ExecutionService);
-  protected readonly runState = inject(NodeRunStatusDirective).state;
+  protected readonly execution = inject(ExecutionService);
+  private readonly runState = inject(NodeRunStatusDirective).state;
   protected readonly awaitingPerson = computed(() => this.runState()?.status === 'waiting');
 
   protected readonly portIn = PORT_IN;
@@ -51,9 +51,4 @@ export class DecisionNodeComponent implements NgDiagramNodeTemplate<WorkflowNode
   protected readonly data = computed(() => this.node().data);
   protected readonly def = computed(() => NODE_CATALOG[this.data().kind]);
   protected readonly branches = computed(() => this.data().branches ?? []);
-  protected readonly summary = computed(() => selectedOption(this.data(), this.def().summaryKey));
-
-  protected decide(branchId: string): void {
-    this.execution.decide(this.node().id, branchId);
-  }
 }

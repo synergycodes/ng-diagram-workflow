@@ -1,0 +1,21 @@
+/* The chip itself is the card's flex item. */
+:host {
+  display: contents;
+}
+
+.chip {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 0.375rem;
+  max-width: 100%;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: var(--wf-bg-secondary);
+  color: var(--wf-text-secondary);
+}
+
+app-node-icon {
+  font-size: 0.875rem;
+  color: var(--wf-node-icon);
+}

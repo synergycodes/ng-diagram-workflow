@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import {
   NgDiagramNodeSelectedDirective,
   NgDiagramPortComponent,
@@ -38,8 +38,6 @@ import { NodeIconComponent } from '../shared/node-icon.component';
 })
 export class AiAgentNodeComponent implements NgDiagramNodeTemplate<WorkflowNodeData> {
   readonly node = input.required<Node<WorkflowNodeData>>();
-
-  protected readonly runState = inject(NodeRunStatusDirective).state;
 
   protected readonly portIn = PORT_IN;
   protected readonly portOut = PORT_OUT;
