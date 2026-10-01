@@ -9,7 +9,6 @@ import {
 import { templateById, TEMPLATE_QUERY_PARAM, type WorkflowTemplate } from '../diagram/templates';
 import { ExecutionService } from '../execution/execution.service';
 import { ProjectNameService } from '../top-navbar/project-name.service';
-import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 
 /**
  * Owns the workflow on the canvas: the template it starts from (`?template=<id>`,
@@ -22,7 +21,6 @@ export class TemplateSelectorService {
   private readonly modelService = inject(NgDiagramModelService);
   private readonly viewport = inject(NgDiagramViewportService);
   private readonly projectName = inject(ProjectNameService);
-  private readonly config = inject(WORKFLOW_EDITOR_CONFIG);
   private readonly execution = inject(ExecutionService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -66,6 +64,8 @@ export class TemplateSelectorService {
       },
       { waitForMeasurements: true },
     );
+    // Without a padding argument, `zoomToFit` uses the one in the diagram config.
+    if (nodes.length > 0) await this.viewport.zoomToFit();
     this.projectName.rename(template?.name ?? '');
     // Keep the choice in the URL so a reload (or a bookmark) opens the same template.
     await this.router.navigate([], {
@@ -74,6 +74,5 @@ export class TemplateSelectorService {
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
-    if (nodes.length > 0) await this.viewport.zoomToFit({ padding: canvasFitPadding(this.config) });
   }
 }
