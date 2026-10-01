@@ -142,8 +142,8 @@ few `--ngd-*` variables that drive the on-canvas look.
   it up automatically. For a custom layout, create a template component and
   register it in `nodeTemplateMap` in `diagram.component.ts`.
 - **Icons:** use `ph-<name>` for any [Phosphor](https://phosphoricons.com/) icon.
-  For your own SVGs in `src/assets/`, use `mask:<file>` for a single-colour icon
-  or `img:<file>` for a full-colour one.
+  For your own single-colour SVGs in `src/assets/`, use `mask:<file>`; the icon
+  takes the text colour.
 - **Change the seed workflows:** edit or add a file in [`diagram/templates/`](src/app/workflow-editor/diagram/templates/) and list it in `WORKFLOW_TEMPLATES`.
 - **Tune the editor:** edit `WORKFLOW_EDITOR_DEFAULTS` (zoom-to-fit padding,
   zoom step, grid size) in [`workflow-editor.config.ts`](src/app/workflow-editor/workflow-editor.config.ts),
