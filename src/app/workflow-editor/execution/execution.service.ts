@@ -16,6 +16,9 @@ export interface NodeRunState {
   message?: string;
 }
 
+/** Statuses a step can end a run with; the others mean it was still in progress. */
+const FINAL_STATUSES: ReadonlySet<NodeRunStatus> = new Set(['succeeded', 'failed']);
+
 /**
  * Runs the current workflow on the `WorkflowBackend` and keeps what it reports
  * as signals the canvas reads: a status per node and the connections the flow
@@ -57,6 +60,13 @@ export class ExecutionService {
   stop(): void {
     if (!this.isRunning()) return;
     this.subscription?.unsubscribe();
+    // Steps cut off mid-way lose their status: no spinner keeps turning and no
+    // Approval keeps offering branches that nothing is waiting for any more.
+    this.statuses.update((all) =>
+      Object.fromEntries(
+        Object.entries(all).filter(([, state]) => FINAL_STATUSES.has(state.status)),
+      ),
+    );
     this.finish('stopped');
   }
 
