@@ -74,7 +74,7 @@ Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads:
 | Edge template + label   | `NgDiagramEdgeTemplateMap`, `NgDiagramBaseEdgeComponent`, `NgDiagramBaseEdgeLabelComponent`    | `diagram/edges/label-edge/`                                     |
 | Connection rules        | `linking.validateConnection`, `finalEdgeDataBuilder`                                           | `diagram/diagram.component.ts`                                  |
 | Graph rules             | `Middleware`, `createMiddlewares`, `[middlewares]` input, `helpers`, `next({ edgesToRemove })` | `diagram/middlewares/`, `diagram/model/cycles.ts`               |
-| Read-only while running | `context.modelActionTypes` allow-list, `cancel()`                                              | `diagram/middlewares/run-lock.middleware.ts`                    |
+| Read-only while running | `helpers.anyNodesAdded / checkIfAnyNodePropsChanged`, `cancel()`, first in the chain           | `diagram/middlewares/run-lock.middleware.ts`                    |
 | Live run status         | node / edge templates reading signals fed by a `WorkflowBackend` event stream                  | `execution/`, `diagram/nodes/shared/node-status.*`              |
 | Routing, snapping       | `edgeRouting.orthogonal`, `snapping`, `background`                                             | `diagram/diagram.component.ts`                                  |
 | Palette                 | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                        | `palette-sidebar/components/palette-tile/`                      |

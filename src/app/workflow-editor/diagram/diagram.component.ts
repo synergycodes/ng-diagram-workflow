@@ -99,11 +99,12 @@ export class DiagramComponent {
     watermarkPosition: 'bottom-left',
   } satisfies NgDiagramConfig;
 
-  // Graph-level rules run as middleware on every model change.
+  // Graph-level rules run as middleware on every model change. The run lock
+  // goes first, so an edit it cancels never reaches the other middlewares.
   middlewares = createMiddlewares((defaults) => [
+    createRunLockMiddleware(() => this.execution.isRunning()),
     ...defaults,
     createCycleExitMiddleware((message) => this.notice.report(message)),
-    createRunLockMiddleware(() => this.execution.isRunning()),
   ]);
 
   nodeTemplateMap = new NgDiagramNodeTemplateMap(Object.entries(NODE_TEMPLATE_COMPONENTS));
