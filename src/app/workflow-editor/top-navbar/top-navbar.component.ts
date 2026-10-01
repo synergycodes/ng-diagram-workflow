@@ -7,19 +7,23 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { EditorNoticeService } from '../editor-notice.service';
 import { ExportMenuComponent } from '../export/export-menu.component';
 import { ProjectNameService } from './project-name.service';
+import { RunControlComponent } from './run-control.component';
 import { ThemeToggleComponent } from './theme-toggle.component';
 
 @Component({
   selector: 'app-top-navbar',
-  imports: [ThemeToggleComponent, ExportMenuComponent],
+  imports: [ThemeToggleComponent, ExportMenuComponent, RunControlComponent],
   templateUrl: './top-navbar.component.html',
   styleUrl: './top-navbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TopNavbarComponent {
   protected readonly projectName = inject(ProjectNameService);
+  // Short-lived messages about what the editor just refused to do.
+  protected readonly notice = inject(EditorNoticeService);
 
   // Click the project name to rename it.
   protected readonly editing = signal(false);

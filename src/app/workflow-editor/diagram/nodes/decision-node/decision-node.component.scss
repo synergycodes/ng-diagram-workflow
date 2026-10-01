@@ -6,3 +6,30 @@
 .branch-port {
   left: calc(100% + 1.125rem + 3px);
 }
+
+/* Waiting for a person: each branch row is a button, in the run status colour. */
+.item.choice {
+  border-color: var(--run-status-color);
+  border-style: dashed;
+}
+
+.choice-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  /* Stretch the hit area over the whole row. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+}
+
+.item.choice:hover {
+  border-style: solid;
+  background: color-mix(in srgb, var(--run-status-color) 15%, var(--wf-bg-tertiary));
+}

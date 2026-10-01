@@ -32,6 +32,28 @@
   border-color: var(--wf-node-stroke-hover);
 }
 
+/* Live run status reported by the backend (see NodeRunStatusDirective). */
+:host([data-run-status]) .card {
+  border-color: var(--run-status-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--run-status-color) 25%, transparent);
+}
+
+:host([data-run-status='running']) {
+  --run-status-color: var(--wf-status-running);
+}
+
+:host([data-run-status='waiting']) {
+  --run-status-color: var(--wf-status-waiting);
+}
+
+:host([data-run-status='succeeded']) {
+  --run-status-color: var(--wf-status-succeeded);
+}
+
+:host([data-run-status='failed']) {
+  --run-status-color: var(--wf-status-failed);
+}
+
 /* Invisible strip level with the header; its left/right ports sit on the card
    border, vertically centred on the icon box (header = 0.5rem pad + 46px box). */
 .header-ports {
@@ -88,22 +110,4 @@
   border-style: dashed;
   background: transparent;
   color: var(--wf-text-tertiary);
-}
-
-/* Summary chip: the option picked in the node's main select field. */
-.chip {
-  display: inline-flex;
-  align-self: flex-start;
-  align-items: center;
-  gap: 0.375rem;
-  max-width: 100%;
-  padding: 0.25rem 0.5rem;
-  border-radius: 999px;
-  background: var(--wf-bg-secondary);
-  color: var(--wf-text-secondary);
-
-  app-node-icon {
-    font-size: 0.875rem;
-    color: var(--wf-node-icon);
-  }
 }

@@ -48,6 +48,24 @@ const EMAIL_FIELDS: readonly FieldDefinition[] = [
   { kind: 'textarea', key: 'body', label: 'Body', placeholder: 'Write your message…' },
 ];
 
+const NOTIFICATION_CHANNELS: readonly SelectOption[] = [
+  { value: 'email', label: 'Email', icon: 'ph-envelope-simple' },
+  { value: 'sms', label: 'SMS', icon: 'ph-chat-teardrop-dots' },
+  { value: 'pushNotification', label: 'Push Notification', icon: 'ph-bell' },
+  { value: 'webhook', label: 'Webhook', icon: 'ph-webhooks-logo' },
+  { value: 'slackMessage', label: 'Slack Message', icon: 'ph-slack-logo' },
+];
+
+/**
+ * Read by the mock backend: the step reports "failed" when it runs (an Action
+ * with Retry on failure fails once, then succeeds).
+ */
+const SIMULATE_FAILURE: FieldDefinition = {
+  kind: 'switch',
+  key: 'simulateFailure',
+  label: 'Simulate failure',
+};
+
 export const NODE_CATALOG: Record<WorkflowNodeKind, NodeDefinition> = {
   [WorkflowNodeKind.Trigger]: {
     kind: WorkflowNodeKind.Trigger,
@@ -134,6 +152,7 @@ export const NODE_CATALOG: Record<WorkflowNodeKind, NodeDefinition> = {
         key: 'retryOnFailure',
         label: 'Retry on failure',
       },
+      SIMULATE_FAILURE,
     ],
     defaults: {
       type: 'sendEmail',
@@ -143,6 +162,7 @@ export const NODE_CATALOG: Record<WorkflowNodeKind, NodeDefinition> = {
       apiUrl: 'https://api.example.com/update_status',
       httpMethod: 'post',
       retryOnFailure: false,
+      simulateFailure: false,
     },
   },
 
@@ -183,13 +203,7 @@ export const NODE_CATALOG: Record<WorkflowNodeKind, NodeDefinition> = {
         kind: 'select',
         key: 'type',
         label: 'Notification Type',
-        options: [
-          { value: 'email', label: 'Email', icon: 'ph-envelope-simple' },
-          { value: 'sms', label: 'SMS', icon: 'ph-chat-teardrop-dots' },
-          { value: 'pushNotification', label: 'Push Notification', icon: 'ph-bell' },
-          { value: 'webhook', label: 'Webhook', icon: 'ph-webhooks-logo' },
-          { value: 'slackMessage', label: 'Slack Message', icon: 'ph-slack-logo' },
-        ],
+        options: NOTIFICATION_CHANNELS,
       },
       { kind: 'text', key: 'recipient', label: 'Recipient', placeholder: 'Who gets notified?' },
       { kind: 'textarea', key: 'message', label: 'Message', placeholder: 'Notification text…' },
@@ -229,17 +243,60 @@ export const NODE_CATALOG: Record<WorkflowNodeKind, NodeDefinition> = {
         label: 'System Prompt',
         placeholder: 'You are a helpful assistant…',
       },
+      SIMULATE_FAILURE,
     ],
-    defaults: { chatModel: '', memory: '', systemPrompt: '' },
+    defaults: { chatModel: '', memory: '', systemPrompt: '', simulateFailure: false },
+  },
+
+  [WorkflowNodeKind.Approval]: {
+    kind: WorkflowNodeKind.Approval,
+    label: 'Approval',
+    description: 'Wait for a human decision',
+    icon: 'ph-user-check',
+    template: DECISION_NODE_TYPE,
+    summaryKey: 'channel',
+    initialBranches: [
+      { id: 'approved', label: 'Approved' },
+      { id: 'rejected', label: 'Rejected' },
+    ],
+    fields: [
+      { kind: 'text', key: 'approver', label: 'Approver', placeholder: 'Who decides?' },
+      { kind: 'select', key: 'channel', label: 'Ask via', options: NOTIFICATION_CHANNELS },
+      { kind: 'text', key: 'timeout', label: 'Timeout', placeholder: '24h' },
+    ],
+    defaults: { approver: '', channel: 'slackMessage', timeout: '24h' },
+  },
+
+  [WorkflowNodeKind.Merge]: {
+    kind: WorkflowNodeKind.Merge,
+    label: 'Merge',
+    description: 'Join parallel branches',
+    icon: 'ph-arrows-merge',
+    template: WORKFLOW_NODE_TYPE,
+    summaryKey: 'waitFor',
+    fields: [
+      {
+        kind: 'select',
+        key: 'waitFor',
+        label: 'Continue when',
+        options: [
+          { value: 'all', label: 'All branches finish', icon: 'ph-checks' },
+          { value: 'any', label: 'First branch finishes', icon: 'ph-flag-checkered' },
+        ],
+      },
+    ],
+    defaults: { waitFor: 'all' },
   },
 };
 
-/** Palette order (matches the Workflow Builder demo). */
+/** Palette order: the Workflow Builder demo order, with Approval and Merge next to Decision. */
 export const PALETTE_ORDER: readonly WorkflowNodeKind[] = [
   WorkflowNodeKind.Trigger,
   WorkflowNodeKind.Action,
   WorkflowNodeKind.Delay,
   WorkflowNodeKind.Decision,
+  WorkflowNodeKind.Approval,
+  WorkflowNodeKind.Merge,
   WorkflowNodeKind.Notification,
   WorkflowNodeKind.AiAgent,
 ];

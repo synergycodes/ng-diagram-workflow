@@ -65,6 +65,10 @@
 
   /* Status */
   --wf-danger: #d92d2d;
+  --wf-status-running: #1096e7;
+  --wf-status-waiting: #d97706;
+  --wf-status-succeeded: #16a34a;
+  --wf-status-failed: var(--wf-danger);
 
   /* Elevation */
   --wf-shadow: #15151614;
@@ -98,6 +102,9 @@ html[data-theme='dark'] {
   --wf-canvas-dots: #383a40;
 
   --wf-danger: #ff6b6b;
+  --wf-status-running: #3ab0f6;
+  --wf-status-waiting: #f59e0b;
+  --wf-status-succeeded: #22c55e;
 
   --wf-shadow: #00000066;
 }

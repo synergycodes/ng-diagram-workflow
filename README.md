@@ -4,15 +4,18 @@
 
 ![Workflow editor: a nodes library on the left, an order-confirmation workflow on the canvas with a selected decision branching into a notification and a delay, and the decision's branches being edited in the properties panel on the right](docs/assets/demo.png)
 
-Interactive workflow / automation editor built with Angular and [ngDiagram](https://www.ngdiagram.dev/). Drag triggers, actions, delays, decisions, notifications and AI agents onto a canvas, connect them and edit their settings in a side panel. Use this project as a starting point for building your own low-code flow designer, automation builder or node-based editor. Lean dependencies: Angular, ngDiagram, [Phosphor Icons](https://phosphoricons.com/) (web font) and [html-to-image](https://www.npmjs.com/package/html-to-image) (for JPEG export) — no opinionated third-party UI libraries.
+Interactive workflow / automation editor built with Angular and [ngDiagram](https://www.ngdiagram.dev/). Drag triggers, actions, delays, decisions, approvals, merges, notifications and AI agents onto a canvas, connect them and edit their settings in a side panel. Use this project as a starting point for building your own low-code flow designer, automation builder or node-based editor. Lean dependencies: Angular, ngDiagram, [Phosphor Icons](https://phosphoricons.com/) (web font) and [html-to-image](https://www.npmjs.com/package/html-to-image) (for JPEG export) — no opinionated third-party UI libraries.
 
 Features:
 
+- **Templates** for the common agentic patterns — prompt chaining, routing, parallelization, reflection loop, human-in-the-loop — plus the order-confirmation flow, picked from a "Select a template" dialog or deep-linked with `?template=<id>`
 - Drag-and-drop node placement from a searchable **Nodes Library** — each tile is a live preview of the node card
-- Six node types, all described by one **data-driven catalog**
-- Custom node templates beyond the default card: **Decision** (one output port per branch) and **AI Agent** (shows the chosen chat model and memory)
+- Eight node types, all described by one **data-driven catalog**
+- Custom node templates beyond the default card: **Decision** / **Approval** (one output port per branch) and **AI Agent** (shows the chosen chat model and memory)
 - **Properties panel** built with Angular **Signal Forms** — fields come from the catalog, can be shown or hidden depending on other values, and changes appear on the node card as you type
-- Labelled connections drawn as orthogonal edges with rounded corners; invalid connections are rejected (no self-loops, nothing can connect into a Trigger)
+- Labelled connections drawn as orthogonal edges with rounded corners; invalid connections are rejected while they are drawn (no self-loops, nothing can connect into a Trigger)
+- Graph rule enforced twice: a loop may only close if a Decision or Approval can end it (reflection loops yes, endless agent ping-pong no). While drawing, `linking.validateConnection` refuses to snap; for the ways an edge arrives without being drawn (paste, template, programmatic edit) a **middleware** drops just the offending connections and says so in the navbar
+- **Run** a workflow on a **mocked backend**: each step's live status (running, waiting for approval, done, failed) and the path the flow took show on the canvas; Approval steps wait until someone picks Approved / Rejected on the node, and the canvas is locked by a second middleware while a run is in progress
 - Right-click **context menus** — copy / cut / paste / delete on a node, paste on the background
 - **Export** as JSON (nodes and connections) or as a JPEG snapshot of the canvas
 - Minimap and zoom controls; nodes snap to an 18px grid
@@ -20,14 +23,16 @@ Features:
 
 ## Node library
 
-| Node         | Template   | Ports                    | Settings                                              |
-| ------------ | ---------- | ------------------------ | ----------------------------------------------------- |
-| Trigger      | `workflow` | output only (start node) | time-based (CRON expression) or event-based (matcher) |
-| Action       | `workflow` | in, out                  | action type, email fields, API call, retry            |
-| Delay        | `workflow` | in, out                  | delay in milliseconds                                 |
-| Decision     | `decision` | in, one out per branch   | branches (add / rename / remove)                      |
-| Notification | `workflow` | in, out                  | channel, recipient, message                           |
-| AI Agent     | `ai-agent` | in, out                  | chat model, memory, system prompt                     |
+| Node         | Template   | Ports                    | Settings                                                     |
+| ------------ | ---------- | ------------------------ | ------------------------------------------------------------ |
+| Trigger      | `workflow` | output only (start node) | time-based (CRON expression) or event-based (matcher)        |
+| Action       | `workflow` | in, out                  | action type, email fields, API call, retry, simulate failure |
+| Delay        | `workflow` | in, out                  | delay in milliseconds                                        |
+| Decision     | `decision` | in, one out per branch   | branches (add / rename / remove)                             |
+| Approval     | `decision` | in, one out per branch   | approver, channel, timeout; Approved / Rejected branches     |
+| Merge        | `workflow` | in (many), out           | continue when all branches finish or the first one does      |
+| Notification | `workflow` | in, out                  | channel, recipient, message                                  |
+| AI Agent     | `ai-agent` | in, out                  | chat model, memory, system prompt, simulate failure          |
 
 Every node also has a Title and a Description.
 
@@ -45,7 +50,7 @@ npm install
 npm start
 ```
 
-Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads: an order-confirmation flow that emails the customer, branches on order value into a sales notification or a delay, then drafts and sends a follow-up with an AI agent (7 nodes, 6 connections). Try dragging a node from the library onto the canvas, wiring it into the flow and editing its settings in the properties panel. The sample workflow is seed data — replace it in [`diagram/data.ts`](src/app/workflow-editor/diagram/data.ts).
+Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads: an order-confirmation flow that emails the customer, branches on order value into a sales notification or a delay, then drafts and sends a follow-up with an AI agent (7 nodes, 6 connections). Try dragging a node from the library onto the canvas, wiring it into the flow and editing its settings in the properties panel. **Templates** at the bottom of the Nodes Library swaps in one of the AI pattern workflows; `?template=reflection-loop` (or `chaining`, `routing`, `parallelization`, `human-in-the-loop`) opens one directly. Templates are seed data in [`diagram/templates/`](src/app/workflow-editor/diagram/templates/).
 
 ## Scripts
 
@@ -61,19 +66,23 @@ Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads:
 
 ## ngDiagram APIs demonstrated
 
-| Concern               | API                                                                                         | Where in this repo                                    |
-| --------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Setup                 | `provideNgDiagram()`, `initializeModel()`                                                   | `pages/workflow-editor-page.component.ts`, `diagram/` |
-| Node templates        | `NgDiagramNodeTemplateMap`, `NgDiagramNodeTemplate`, `NgDiagramPortComponent`               | `diagram/nodes/*`                                     |
-| Dynamic ports         | one `ng-diagram-port` per decision branch                                                   | `diagram/nodes/decision-node/`                        |
-| Edge template + label | `NgDiagramEdgeTemplateMap`, `NgDiagramBaseEdgeComponent`, `NgDiagramBaseEdgeLabelComponent` | `diagram/edges/label-edge/`                           |
-| Connection rules      | `linking.validateConnection`, `finalEdgeDataBuilder`                                        | `diagram/diagram.component.ts`                        |
-| Routing, snapping     | `edgeRouting.orthogonal`, `snapping`, `background`                                          | `diagram/diagram.component.ts`                        |
-| Palette               | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                     | `palette-sidebar/components/palette-tile/`            |
-| Model updates         | `NgDiagramModelService.updateNodeData / updateEdgeData / deleteEdges`                       | `properties-sidebar/properties-sidebar.service.ts`    |
-| Selection             | `NgDiagramSelectionService`, `selectionGestureEnded`, `paletteItemDropped`                  | `properties-sidebar/`, `diagram/`                     |
-| Clipboard             | `NgDiagramClipboardService`                                                                 | `diagram/editor-actions.service.ts`                   |
-| Viewport, minimap     | `NgDiagramViewportService`, `NgDiagramMinimapComponent`                                     | `minimap-bar/`, `export/`                             |
+| Concern                 | API                                                                                            | Where in this repo                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Setup                   | `provideNgDiagram()`, `initializeModel()`                                                      | `pages/workflow-editor-page.component.ts`, `template-selector/` |
+| Node templates          | `NgDiagramNodeTemplateMap`, `NgDiagramNodeTemplate`, `NgDiagramPortComponent`                  | `diagram/nodes/*`                                               |
+| Dynamic ports           | one `ng-diagram-port` per decision branch                                                      | `diagram/nodes/decision-node/`                                  |
+| Edge template + label   | `NgDiagramEdgeTemplateMap`, `NgDiagramBaseEdgeComponent`, `NgDiagramBaseEdgeLabelComponent`    | `diagram/edges/label-edge/`                                     |
+| Connection rules        | `linking.validateConnection`, `finalEdgeDataBuilder`                                           | `diagram/diagram.component.ts`                                  |
+| Graph rules             | `Middleware`, `createMiddlewares`, `[middlewares]` input, `helpers`, `next({ edgesToRemove })` | `diagram/middlewares/`, `diagram/model/cycles.ts`               |
+| Read-only while running | `helpers.anyNodesAdded / checkIfAnyNodePropsChanged`, `cancel()`, first in the chain           | `diagram/middlewares/run-lock.middleware.ts`                    |
+| Live run status         | node / edge templates reading signals fed by a `WorkflowBackend` event stream                  | `execution/`, `diagram/nodes/shared/node-status.*`              |
+| Routing, snapping       | `edgeRouting.orthogonal`, `snapping`, `background`                                             | `diagram/diagram.component.ts`                                  |
+| Palette                 | `NgDiagramPaletteItemComponent`, `NgDiagramPaletteItemPreviewComponent`                        | `palette-sidebar/components/palette-tile/`                      |
+| Model updates           | `NgDiagramModelService.updateNodeData / updateEdgeData / deleteEdges`                          | `properties-sidebar/properties-sidebar.service.ts`              |
+| Replace the model       | `deleteNodes`, `transaction({ waitForMeasurements })`, `addNodes / addEdges`, `zoomToFit`      | `template-selector/template-selector.service.ts`                |
+| Selection               | `NgDiagramSelectionService`, `selectionGestureEnded`, `paletteItemDropped`                     | `properties-sidebar/`, `diagram/`                               |
+| Clipboard               | `NgDiagramClipboardService`                                                                    | `diagram/editor-actions.service.ts`                             |
+| Viewport, minimap       | `NgDiagramViewportService`, `NgDiagramMinimapComponent`                                        | `minimap-bar/`, `export/`                                       |
 
 ## Architecture
 
@@ -87,20 +96,24 @@ src/
     ├── pages/                        # page shell: canvas + overlaid panels, provideNgDiagram()
     ├── diagram/
     │   ├── diagram.component.*       # ng-diagram host, config, template maps, events
-    │   ├── data.ts                   # seed workflow
+    │   ├── templates/                # seed workflows: order flow + one per AI pattern
     │   ├── editor-actions.service.ts # copy / cut / paste / delete
-    │   ├── model/                    # types, node catalog, field model, guards (+ specs)
+    │   ├── model/                    # types, node catalog, field model, guards, cycle check (+ specs)
+    │   ├── middlewares/              # graph + run-lock rules on every model change (+ specs)
     │   ├── nodes/                    # workflow, decision, ai-agent templates + shared header/icon
     │   └── edges/label-edge/         # labelled edge template
+    ├── editor-notice.service.ts      # short navbar messages for what the editor refused to do
+    ├── execution/                    # WorkflowBackend contract, mock backend, run state (+ spec)
     ├── palette-sidebar/              # Nodes Library + draggable tiles
+    ├── template-selector/            # starting template + "Select a template" dialog, swaps the model in place
     ├── properties-sidebar/           # panel, Signal Forms for nodes / edges, icon select control
     ├── minimap-bar/                  # zoom stepper + minimap popover
     ├── context-menu/                 # node / background right-click menu
     ├── export/                       # JSON + JPEG export, navbar dropdown
-    └── top-navbar/                   # logo, editable workflow name, export, theme toggle
+    └── top-navbar/                   # logo, editable workflow name, run, export, theme toggle
 ```
 
-The ng-diagram `node.type` selects the **template**, which controls the node's layout. `node.data.kind` says **what the node is**. This split lets Trigger, Action, Delay and Notification share one card template while Decision and AI Agent get their own.
+The ng-diagram `node.type` selects the **template**, which controls the node's layout. `node.data.kind` says **what the node is**. This split lets Trigger, Action, Delay, Notification and Merge share one card template, Decision and Approval share the branching template, and AI Agent gets its own.
 
 ### Properties forms
 
@@ -129,13 +142,27 @@ few `--ngd-*` variables that drive the on-canvas look.
   it up automatically. For a custom layout, create a template component and
   register it in `nodeTemplateMap` in `diagram.component.ts`.
 - **Icons:** use `ph-<name>` for any [Phosphor](https://phosphoricons.com/) icon.
-  For your own SVGs in `src/assets/`, use `mask:<file>` for a single-colour icon
-  or `img:<file>` for a full-colour one.
-- **Change the seed workflow:** edit [`data.ts`](src/app/workflow-editor/diagram/data.ts).
+  For your own single-colour SVGs in `src/assets/`, use `mask:<file>`; the icon
+  takes the text colour.
+- **Change the seed workflows:** edit or add a file in [`diagram/templates/`](src/app/workflow-editor/diagram/templates/) and list it in `WORKFLOW_TEMPLATES`.
 - **Tune the editor:** edit `WORKFLOW_EDITOR_DEFAULTS` (zoom-to-fit padding,
   zoom step, grid size) in [`workflow-editor.config.ts`](src/app/workflow-editor/workflow-editor.config.ts),
   or override the `WORKFLOW_EDITOR_CONFIG` token in the page providers.
 - **Theme:** adjust the `--wf-*` tokens in `workflow-theme.css`.
+
+## Execution
+
+**Run** (navbar) sends the same `ng-diagram-workflow` document the JSON export
+produces to a `WorkflowBackend` and folds the `RunEvent`s it streams back
+(`node` status, `edge` travelled, `finished`) into signals the node and edge
+templates read. The page provides
+[`MockWorkflowBackend`](src/app/workflow-editor/execution/mock-backend.ts),
+which walks the graph with timers: parallel branches run at once, a Merge
+waits for all branches or the first one, a Decision loops back once and then
+goes forward, an Approval waits for a click on one of its branches, and
+**Simulate failure** fails a step (an Action with **Retry on failure** fails
+once, then succeeds). To connect a real engine, provide another
+`WorkflowBackend` in `workflow-editor-page.component.ts`.
 
 ## Export format
 
@@ -151,9 +178,9 @@ This template is a demo of the editor UI, not a workflow engine. It does not inc
 
 - undo/redo
 - persistence or import
-- workflow validation
+- workflow validation beyond connection rules and loop exits
 - auto-layout
-- workflow execution
+- real workflow execution — runs are simulated in the browser by `MockWorkflowBackend`
 
 ## Workflow Builder
 

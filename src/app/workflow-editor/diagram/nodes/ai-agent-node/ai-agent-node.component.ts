@@ -9,6 +9,8 @@ import { NODE_CATALOG, selectedOption } from '../../model/node-catalog';
 import { PORT_IN, PORT_OUT, type WorkflowNodeData } from '../../model/workflow-types';
 import { NodeContextMenuDirective } from '../shared/node-context-menu.directive';
 import { NodeHeaderComponent } from '../shared/node-header.component';
+import { NodeRunStatusDirective } from '../shared/node-run-status.directive';
+import { NodeStatusComponent } from '../shared/node-status.component';
 import { NodeIconComponent } from '../shared/node-icon.component';
 
 /**
@@ -22,12 +24,16 @@ import { NodeIconComponent } from '../shared/node-icon.component';
     NgDiagramNodeSelectedDirective,
     NgDiagramPortComponent,
     NodeHeaderComponent,
+    NodeStatusComponent,
     NodeIconComponent,
   ],
   templateUrl: './ai-agent-node.component.html',
   styleUrl: './ai-agent-node.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [{ directive: NodeContextMenuDirective, inputs: ['node'] }],
+  hostDirectives: [
+    { directive: NodeContextMenuDirective, inputs: ['node'] },
+    { directive: NodeRunStatusDirective, inputs: ['node'] },
+  ],
   host: { class: 'ng-diagram-port-hoverable-over-node' },
 })
 export class AiAgentNodeComponent implements NgDiagramNodeTemplate<WorkflowNodeData> {

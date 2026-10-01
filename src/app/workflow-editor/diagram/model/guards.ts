@@ -16,3 +16,8 @@ export function isLabelEdge(edge: Edge | null | undefined): edge is Edge<Workflo
 export function isStartNode(node: Node | null | undefined): boolean {
   return isWorkflowNode(node) && !!NODE_CATALOG[node.data.kind].isStart;
 }
+
+/** True for branching nodes (Decision, Approval): a loop through one can end. */
+export function isLoopExit(node: Node | null | undefined): boolean {
+  return isWorkflowNode(node) && !!NODE_CATALOG[node.data.kind].initialBranches;
+}

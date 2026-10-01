@@ -86,3 +86,12 @@
   align-items: center;
   gap: 12px;
 }
+
+/* Why the editor refused something (rejected connection, empty run). */
+.notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 420px;
+  color: var(--wf-status-waiting);
+}

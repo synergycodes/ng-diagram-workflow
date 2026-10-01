@@ -1,0 +1,6 @@
+@if (pill(); as pill) {
+  <span class="pill p11" [class.running]="pill.status === 'running'" role="status">
+    <i class="ph {{ pill.icon }}" aria-hidden="true"></i>
+    {{ pill.label }}
+  </span>
+}

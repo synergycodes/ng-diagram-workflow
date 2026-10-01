@@ -1,0 +1,31 @@
+:host {
+  position: absolute;
+  z-index: 1;
+  top: -0.875rem;
+  right: 0.75rem;
+  pointer-events: none;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 13rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  background: var(--run-status-color);
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.running i {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

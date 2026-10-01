@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
-  initializeModel,
+  createMiddlewares,
   NgDiagramBackgroundComponent,
   NgDiagramComponent,
   NgDiagramEdgeTemplateMap,
@@ -15,11 +15,16 @@ import {
   type SelectionGestureEndedEvent,
 } from 'ng-diagram';
 import { ContextMenuService } from '../context-menu/context-menu.service';
+import { EditorNoticeService } from '../editor-notice.service';
+import { ExecutionService } from '../execution/execution.service';
 import { PaletteDragService } from '../palette-sidebar/palette-drag.service';
 import { PropertiesSidebarService } from '../properties-sidebar/properties-sidebar.service';
-import { WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
-import { workflowModel } from './data';
+import { TemplateSelectorService } from '../template-selector/template-selector.service';
+import { canvasFitPadding, WORKFLOW_EDITOR_CONFIG } from '../workflow-editor.config';
 import { LabelEdgeComponent } from './edges/label-edge/label-edge.component';
+import { createCycleExitMiddleware } from './middlewares/cycle-exit.middleware';
+import { createRunLockMiddleware } from './middlewares/run-lock.middleware';
+import { createsCycleWithoutExit } from './model/cycles';
 import { isStartNode } from './model/guards';
 import { LABEL_EDGE_TYPE } from './model/workflow-types';
 import { NODE_TEMPLATE_COMPONENTS } from './nodes/node-templates';
@@ -45,13 +50,18 @@ export class DiagramComponent {
   private readonly sidebarService = inject(PropertiesSidebarService);
   private readonly contextMenu = inject(ContextMenuService);
   private readonly paletteDrag = inject(PaletteDragService);
+  private readonly execution = inject(ExecutionService);
+  private readonly notice = inject(EditorNoticeService);
 
   private readonly grid = { width: this.config.gridSize, height: this.config.gridSize };
-  private readonly fitPadding = this.config.viewport.zoomToFitPadding;
 
   diagramConfig = {
     linking: {
-      // Workflows flow forward: no self-loops and nothing may enter a start node.
+      // Checked while the connection is being drawn, so an invalid target
+      // simply refuses to snap: workflows flow forward (no self-loops, nothing
+      // enters a start node) and a loop needs a Decision or an Approval to end
+      // it. The graph rule runs as middleware too, for the ways an edge can
+      // appear without being drawn.
       validateConnection: (
         source: Node | null,
         sourcePort: Port | null,
@@ -60,7 +70,8 @@ export class DiagramComponent {
       ) => {
         if (!source || !target || !sourcePort || !targetPort) return false;
         if (source.id === target.id) return false;
-        return !isStartNode(target);
+        if (isStartNode(target)) return false;
+        return !this.closesEndlessLoop(source.id, target.id);
       },
       // Every drawn connection becomes a label edge without arrowheads.
       temporaryEdgeDataBuilder: withLabelEdge,
@@ -82,21 +93,25 @@ export class DiagramComponent {
       zoomToFit: {
         onInit: true,
         // Extra room on each side keeps the workflow clear of the overlay panels.
-        padding: [
-          this.fitPadding + 72,
-          this.fitPadding + 72,
-          this.fitPadding + 72,
-          this.fitPadding + 340,
-        ],
+        padding: canvasFitPadding(this.config),
       },
     },
     watermarkPosition: 'bottom-left',
   } satisfies NgDiagramConfig;
 
+  // Graph-level rules run as middleware on every model change. The run lock
+  // goes first, so an edit it cancels never reaches the other middlewares.
+  middlewares = createMiddlewares((defaults) => [
+    createRunLockMiddleware(() => this.execution.isRunning()),
+    ...defaults,
+    createCycleExitMiddleware((message) => this.notice.report(message)),
+  ]);
+
   nodeTemplateMap = new NgDiagramNodeTemplateMap(Object.entries(NODE_TEMPLATE_COMPONENTS));
   edgeTemplateMap = new NgDiagramEdgeTemplateMap([[LABEL_EDGE_TYPE, LabelEdgeComponent]]);
 
-  model = initializeModel(workflowModel);
+  // The workflow to show: the starting template, then whatever the template picker loads.
+  model = inject(TemplateSelectorService).model;
 
   /**
    * Align a freshly dropped node with the drag preview (centred on the cursor),
@@ -123,6 +138,15 @@ export class DiagramComponent {
     if (event.nodes.length > 0 || event.edges.length > 0) {
       this.sidebarService.expandSidebar();
     }
+  }
+
+  /** True when connecting `source` to `target` would close a loop nothing can end. */
+  private closesEndlessLoop(source: string, target: string): boolean {
+    return createsCycleWithoutExit(
+      (id) => this.modelService.getNodeById(id),
+      this.modelService.edges(),
+      { source, target },
+    );
   }
 
   /** Right-click on empty canvas → background context menu (paste only). */

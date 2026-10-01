@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import {
   NgDiagramBaseEdgeComponent,
   NgDiagramBaseEdgeLabelComponent,
@@ -6,11 +6,13 @@ import {
   type Edge,
   type NgDiagramEdgeTemplate,
 } from 'ng-diagram';
+import { ExecutionService } from '../../../execution/execution.service';
 import type { WorkflowEdgeData } from '../../model/workflow-types';
 
 /**
  * Workflow connection: an orthogonal, rounded path without arrowheads and an
- * optional pill label at the midpoint (Workflow Builder `labelEdge`).
+ * optional pill label at the midpoint (Workflow Builder `labelEdge`). Lit up
+ * once a run's flow has gone along it.
  */
 @Component({
   selector: 'app-label-edge',
@@ -21,7 +23,7 @@ import type { WorkflowEdgeData } from '../../model/workflow-types';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ng-diagram-base-edge class="label-edge" [edge]="edge()">
+    <ng-diagram-base-edge class="label-edge" [class.traversed]="traversed()" [edge]="edge()">
       @if (edge().data.label) {
         <ng-diagram-base-edge-label
           [id]="edge().id + '-label'"
@@ -38,4 +40,9 @@ import type { WorkflowEdgeData } from '../../model/workflow-types';
 })
 export class LabelEdgeComponent implements NgDiagramEdgeTemplate<WorkflowEdgeData> {
   readonly edge = input.required<Edge<WorkflowEdgeData>>();
+
+  private readonly execution = inject(ExecutionService);
+  protected readonly traversed = computed(() =>
+    this.execution.traversedEdges().has(this.edge().id),
+  );
 }

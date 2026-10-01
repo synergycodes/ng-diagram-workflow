@@ -1,34 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { toCanvas } from 'html-to-image';
-import { NgDiagramModelService, NgDiagramViewportService, type Point } from 'ng-diagram';
-import { isLabelEdge, isWorkflowNode } from '../diagram/model/guards';
-import type { DecisionBranch, PropertyValue } from '../diagram/model/workflow-types';
+import { NgDiagramModelService, NgDiagramViewportService } from 'ng-diagram';
+import { toWorkflowDocument } from '../execution/workflow-document';
 import { ProjectNameService } from '../top-navbar/project-name.service';
-
-/** Serialized workflow: its steps plus the connections between their ports. */
-interface WorkflowDocument {
-  format: 'ng-diagram-workflow';
-  version: 1;
-  name: string;
-  generatedAt: string;
-  nodes: {
-    id: string;
-    kind: string;
-    position: Point;
-    label: string;
-    description: string;
-    properties: Record<string, PropertyValue>;
-    branches?: DecisionBranch[];
-  }[];
-  connections: {
-    id: string;
-    source: string;
-    sourcePort?: string;
-    target: string;
-    targetPort?: string;
-    label?: string;
-  }[];
-}
 
 /** Downloads the current workflow as JSON (the model) or JPEG (a raster of the canvas). */
 @Injectable()
@@ -38,7 +12,11 @@ export class ExportService {
   private readonly projectName = inject(ProjectNameService);
 
   exportJson(): void {
-    const doc = this.buildDocument();
+    const doc = toWorkflowDocument(
+      this.modelService.nodes(),
+      this.modelService.edges(),
+      this.projectName.name(),
+    );
     const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json' });
     this.download(blob, `${this.projectName.fileName()}.json`);
   }
@@ -67,38 +45,6 @@ export class ExportService {
 
     const blob = await toJpegBlob(canvas, 0.95);
     if (blob) this.download(blob, `${this.projectName.fileName()}.jpeg`);
-  }
-
-  private buildDocument(): WorkflowDocument {
-    return {
-      format: 'ng-diagram-workflow',
-      version: 1,
-      name: this.projectName.name(),
-      generatedAt: new Date().toISOString(),
-      nodes: this.modelService
-        .nodes()
-        .filter(isWorkflowNode)
-        .map(({ id, position, data }) => ({
-          id,
-          kind: data.kind,
-          position,
-          label: data.label,
-          description: data.description,
-          properties: data.properties,
-          ...(data.branches ? { branches: data.branches } : {}),
-        })),
-      connections: this.modelService
-        .edges()
-        .filter(isLabelEdge)
-        .map(({ id, source, sourcePort, target, targetPort, data }) => ({
-          id,
-          source,
-          sourcePort,
-          target,
-          targetPort,
-          ...(data.label ? { label: data.label } : {}),
-        })),
-    };
   }
 
   private download(blob: Blob, filename: string): void {

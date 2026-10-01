@@ -5,15 +5,17 @@ import {
   type NgDiagramNodeTemplate,
   type Node,
 } from 'ng-diagram';
-import { NODE_CATALOG, selectedOption } from '../../model/node-catalog';
+import { NODE_CATALOG } from '../../model/node-catalog';
 import { PORT_IN, PORT_OUT, type WorkflowNodeData } from '../../model/workflow-types';
 import { NodeContextMenuDirective } from '../shared/node-context-menu.directive';
 import { NodeHeaderComponent } from '../shared/node-header.component';
-import { NodeIconComponent } from '../shared/node-icon.component';
+import { NodeRunStatusDirective } from '../shared/node-run-status.directive';
+import { NodeStatusComponent } from '../shared/node-status.component';
+import { NodeSummaryComponent } from '../shared/node-summary.component';
 
 /**
- * Default workflow card used by Trigger, Action, Delay and
- * Notification: the header plus a chip showing the chosen sub-type. One input
+ * Default workflow card used by Trigger, Action, Delay, Notification and
+ * Merge: the header plus a chip showing the chosen sub-type. One input
  * port on the left (omitted for start nodes) and one output port on the right.
  */
 @Component({
@@ -22,12 +24,16 @@ import { NodeIconComponent } from '../shared/node-icon.component';
     NgDiagramNodeSelectedDirective,
     NgDiagramPortComponent,
     NodeHeaderComponent,
-    NodeIconComponent,
+    NodeStatusComponent,
+    NodeSummaryComponent,
   ],
   templateUrl: './workflow-node.component.html',
   styleUrl: './workflow-node.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [{ directive: NodeContextMenuDirective, inputs: ['node'] }],
+  hostDirectives: [
+    { directive: NodeContextMenuDirective, inputs: ['node'] },
+    { directive: NodeRunStatusDirective, inputs: ['node'] },
+  ],
   host: { class: 'ng-diagram-port-hoverable-over-node' },
 })
 export class WorkflowNodeComponent implements NgDiagramNodeTemplate<WorkflowNodeData> {
@@ -38,5 +44,4 @@ export class WorkflowNodeComponent implements NgDiagramNodeTemplate<WorkflowNode
 
   protected readonly data = computed(() => this.node().data);
   protected readonly def = computed(() => NODE_CATALOG[this.data().kind]);
-  protected readonly summary = computed(() => selectedOption(this.data(), this.def().summaryKey));
 }

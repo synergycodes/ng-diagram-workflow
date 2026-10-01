@@ -1,12 +1,26 @@
 <div class="card" ngDiagramNodeSelected [node]="node()">
+  <app-node-status />
   <app-node-header [icon]="def().icon" [label]="data().label" [description]="data().description">
   </app-node-header>
+  <app-node-summary [data]="data()" />
 
   <section class="section">
     <h4 class="h10 section-title">Branches</h4>
     @for (branch of branches(); track branch.id; let i = $index) {
-      <div class="item p11">
-        <span class="item-label">{{ branch.label || 'Branch ' + (i + 1) }}</span>
+      @let label = branch.label || 'Branch ' + (i + 1);
+      <div class="item p11" [class.choice]="awaitingPerson()">
+        @if (awaitingPerson()) {
+          <!-- Human-in-the-loop: the step waits until someone picks a branch here. -->
+          <button
+            class="item-label choice-button"
+            type="button"
+            (click)="execution.decide(node().id, branch.id)"
+          >
+            {{ label }}
+          </button>
+        } @else {
+          <span class="item-label">{{ label }}</span>
+        }
         <ng-diagram-port
           class="branch-port"
           [id]="branchPortId(branch.id)"

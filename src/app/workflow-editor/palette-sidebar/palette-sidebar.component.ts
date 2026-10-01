@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NODE_CATALOG, PALETTE_ORDER } from '../diagram/model/node-catalog';
 import { NodeIconComponent } from '../diagram/nodes/shared/node-icon.component';
+import { TemplateSelectorService } from '../template-selector/template-selector.service';
 import { PaletteTileComponent } from './components/palette-tile/palette-tile.component';
 
 /**
- * Left "Nodes Library" panel: a searchable list of draggable node tiles. The
- * whole panel collapses to its header.
+ * Left "Nodes Library" panel: a searchable list of draggable node tiles and a
+ * button that opens the template picker. The whole panel collapses to its header.
  */
 @Component({
   selector: 'app-palette-sidebar',
@@ -15,6 +16,7 @@ import { PaletteTileComponent } from './components/palette-tile/palette-tile.com
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaletteSidebarComponent {
+  protected readonly templates = inject(TemplateSelectorService);
   protected readonly isExpanded = signal(true);
   protected readonly search = signal('');
 

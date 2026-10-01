@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { NODE_CATALOG } from '../diagram/model/node-catalog';
+import { ExecutionService } from '../execution/execution.service';
 import { NodeIconComponent } from '../diagram/nodes/shared/node-icon.component';
 import { EdgePropertiesComponent } from './components/edge-properties/edge-properties.component';
 import { NodePropertiesComponent } from './components/node-properties/node-properties.component';
@@ -30,6 +31,7 @@ export class PropertiesSidebarComponent {
   protected readonly isSelectionEmpty = this.service.isSelectionEmpty;
   protected readonly node = this.service.selectedNode;
   protected readonly edge = this.service.selectedEdge;
+  protected readonly isRunning = inject(ExecutionService).isRunning;
 
   protected readonly def = computed(() => {
     const node = this.node();

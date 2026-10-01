@@ -1,31 +1,49 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import {
   NgDiagramNodeSelectedDirective,
   NgDiagramPortComponent,
   type NgDiagramNodeTemplate,
   type Node,
 } from 'ng-diagram';
+import { ExecutionService } from '../../../execution/execution.service';
 import { NODE_CATALOG } from '../../model/node-catalog';
 import { branchPortId, PORT_IN, type WorkflowNodeData } from '../../model/workflow-types';
 import { NodeContextMenuDirective } from '../shared/node-context-menu.directive';
 import { NodeHeaderComponent } from '../shared/node-header.component';
+import { NodeRunStatusDirective } from '../shared/node-run-status.directive';
+import { NodeStatusComponent } from '../shared/node-status.component';
+import { NodeSummaryComponent } from '../shared/node-summary.component';
 
 /**
- * Decision card: routes the flow into one of several branches. It has a
- * single input port and one output port per branch, placed on the branch row,
- * so each branch can be wired to a different next step.
+ * Branching card used by Decision and Approval: routes the flow into one of
+ * several branches. It has a single input port and one output port per branch,
+ * placed on the branch row, so each branch can be wired to a different next step.
+ * While a run waits on the node, the branch rows become buttons a person picks.
  */
 @Component({
   selector: 'app-decision-node',
-  imports: [NgDiagramNodeSelectedDirective, NgDiagramPortComponent, NodeHeaderComponent],
+  imports: [
+    NgDiagramNodeSelectedDirective,
+    NgDiagramPortComponent,
+    NodeHeaderComponent,
+    NodeStatusComponent,
+    NodeSummaryComponent,
+  ],
   templateUrl: './decision-node.component.html',
   styleUrl: './decision-node.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  hostDirectives: [{ directive: NodeContextMenuDirective, inputs: ['node'] }],
+  hostDirectives: [
+    { directive: NodeContextMenuDirective, inputs: ['node'] },
+    { directive: NodeRunStatusDirective, inputs: ['node'] },
+  ],
   host: { class: 'ng-diagram-port-hoverable-over-node' },
 })
 export class DecisionNodeComponent implements NgDiagramNodeTemplate<WorkflowNodeData> {
   readonly node = input.required<Node<WorkflowNodeData>>();
+
+  protected readonly execution = inject(ExecutionService);
+  private readonly runState = inject(NodeRunStatusDirective).state;
+  protected readonly awaitingPerson = computed(() => this.runState()?.status === 'waiting');
 
   protected readonly portIn = PORT_IN;
   protected readonly branchPortId = branchPortId;

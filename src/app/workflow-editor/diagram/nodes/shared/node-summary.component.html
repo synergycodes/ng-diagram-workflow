@@ -1,0 +1,8 @@
+@if (option(); as option) {
+  <span class="chip p11">
+    @if (option.icon) {
+      <app-node-icon [icon]="option.icon" />
+    }
+    {{ option.label }}
+  </span>
+}

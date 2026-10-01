@@ -111,6 +111,20 @@
   overflow-y: auto;
 }
 
+.library-footer {
+  flex: none;
+  margin-top: auto;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--wf-stroke);
+}
+
+/* `.wf-button` (global) carries the look; only the full-width layout differs. */
+.templates-button {
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+}
+
 .empty {
   padding: 12px 16px;
   color: var(--wf-text-tertiary);
