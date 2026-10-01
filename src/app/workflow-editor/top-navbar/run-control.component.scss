@@ -1,0 +1,16 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.note {
+  color: var(--wf-text-tertiary);
+
+  &.succeeded {
+    color: var(--wf-status-succeeded);
+  }
+  &.failed {
+    color: var(--wf-status-failed);
+  }
+}

@@ -7,54 +7,8 @@ const OUTCOME_LABEL = { succeeded: 'Run finished', failed: 'Run failed', stopped
 @Component({
   selector: 'app-run-control',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    @switch (execution.state()) {
-      @case ('running') {
-        <span class="p10 note">Editing locked</span>
-        <button class="wf-button h10" type="button" (click)="execution.stop()">
-          <i class="ph ph-stop" aria-hidden="true"></i>
-          Stop
-        </button>
-      }
-      @case ('finished') {
-        @if (execution.outcome(); as outcome) {
-          <span class="p10 note" [class]="outcome" role="status">{{ outcomeLabel[outcome] }}</span>
-        }
-        <button class="wf-button h10" type="button" (click)="execution.reset()">
-          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i>
-          Reset
-        </button>
-        <button class="wf-button h10" type="button" (click)="execution.run()">
-          <i class="ph ph-play" aria-hidden="true"></i>
-          Run again
-        </button>
-      }
-      @default {
-        <button class="wf-button h10" type="button" (click)="execution.run()">
-          <i class="ph ph-play" aria-hidden="true"></i>
-          Run
-        </button>
-      }
-    }
-  `,
-  styles: `
-    :host {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .note {
-      color: var(--wf-text-tertiary);
-
-      &.succeeded {
-        color: var(--wf-status-succeeded);
-      }
-      &.failed {
-        color: var(--wf-status-failed);
-      }
-    }
-  `,
+  templateUrl: './run-control.component.html',
+  styleUrl: './run-control.component.scss',
 })
 export class RunControlComponent {
   protected readonly execution = inject(ExecutionService);
