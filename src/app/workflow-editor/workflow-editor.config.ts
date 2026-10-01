@@ -28,8 +28,8 @@ export const WORKFLOW_EDITOR_DEFAULTS: WorkflowEditorConfig = {
 };
 
 /**
- * Zoom-to-fit padding for the canvas: the configured padding plus room for the
- * overlay panels (navbar and properties panel on top / right, library on the left).
+ * Zoom-to-fit padding for the canvas: the configured padding plus the room the
+ * overlay panels take on each side (`panelInsets`).
  */
 export function canvasFitPadding(config: WorkflowEditorConfig): [number, number, number, number] {
   const pad = config.viewport.zoomToFitPadding;

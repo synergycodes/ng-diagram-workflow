@@ -5,10 +5,9 @@ const NOTICE_DURATION = 4000;
 
 /**
  * One short message shown in the navbar, for the moments the editor refuses to
- * do something: a rejected connection, a run with nothing to run. Without it
- * those refusals happen in silence, because they are decided deep in the model
- * pipeline (a cancelled middleware pass) rather than in the component that was
- * clicked.
+ * do something: a rejected connection, a run with nothing to run. The connection
+ * rule is applied inside the middleware chain, far from the component that was
+ * clicked, so without a notice its refusal would go unseen.
  */
 @Injectable()
 export class EditorNoticeService {

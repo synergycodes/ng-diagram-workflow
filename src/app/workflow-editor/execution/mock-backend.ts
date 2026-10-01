@@ -31,7 +31,7 @@ const MAX_VISITS = 3;
  *   to every connection on its output (parallel branches run at once)
  * - `simulateFailure` fails the step; an Action with `retryOnFailure` fails
  *   once and then succeeds
- * - a Decision takes a branch that loops back once (reflection loop), then a
+ * - a Decision takes a branch that loops back once (reflection loop), then
  *   the first wired forward branch, so every run takes the same path
  * - an Approval waits until `submitDecision` picks its branch
  * - a Merge waits for every incoming connection (`all`) or the first (`any`)

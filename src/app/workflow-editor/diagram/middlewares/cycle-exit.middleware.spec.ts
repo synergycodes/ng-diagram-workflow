@@ -12,16 +12,16 @@ function link(source: string, target: string): Edge {
 
 /**
  * The slice of `MiddlewareContext` this middleware reads: the state after the
- * update, plus which edges the update added or moved.
+ * update, plus which edges the update added or changed the ends of.
  */
 function context(options: {
   kinds: Record<string, WorkflowNodeKind>;
   edges: Edge[];
   added?: string[];
-  reconnected?: string[];
+  endsChanged?: string[];
   before?: Edge[];
 }): MiddlewareContext {
-  const { kinds, edges, added = [], reconnected = [], before = [] } = options;
+  const { kinds, edges, added = [], endsChanged = [], before = [] } = options;
   const nodesMap = new Map<string, Node>(
     Object.entries(kinds).map(([id, kind]) => [id, createNode(id, kind, { x: 0, y: 0 })]),
   );
@@ -31,7 +31,7 @@ function context(options: {
     initialEdgesMap: new Map(before.map((edge) => [edge.id, edge])),
     helpers: {
       getAddedEdges: () => edges.filter((edge) => added.includes(edge.id)),
-      getAffectedEdgeIds: () => reconnected,
+      getAffectedEdgeIds: () => endsChanged,
       checkIfEdgeAdded: (id: string) => added.includes(id),
     },
   } as unknown as MiddlewareContext;
@@ -54,7 +54,7 @@ describe('cycle-needs-exit middleware', () => {
     expect(report).not.toHaveBeenCalled();
   });
 
-  /** A paste with one bad connection: the good ones must survive. */
+  /** An update with one bad connection: the good ones must survive. */
   it('removes only the connections that close an endless loop', () => {
     const next = vi.fn();
     const report = vi.fn();
@@ -85,16 +85,16 @@ describe('cycle-needs-exit middleware', () => {
     expect(next).toHaveBeenCalledWith();
   });
 
-  it('snaps a reconnected connection back when its new ends close an endless loop', () => {
+  it('restores the previous ends of a connection whose new ends close an endless loop', () => {
     const next = vi.fn();
     const report = vi.fn();
-    const before = { ...link('b', 'a'), id: 'moved', source: 'b', target: 'c' };
-    const moved = { ...before, target: 'a' };
+    const before = { ...link('b', 'a'), id: 'changed', source: 'b', target: 'c' };
+    const changed = { ...before, target: 'a' };
     createCycleExitMiddleware(report).execute(
       context({
         kinds: { t: Trigger, a: AiAgent, b: AiAgent, c: AiAgent },
-        edges: [link('t', 'a'), link('a', 'b'), moved],
-        reconnected: ['moved'],
+        edges: [link('t', 'a'), link('a', 'b'), changed],
+        endsChanged: ['changed'],
         before: [before],
       }),
       next,

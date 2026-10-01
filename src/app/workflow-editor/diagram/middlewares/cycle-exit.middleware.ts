@@ -9,16 +9,16 @@ const rejectedMessage = (count: number) =>
 
 /**
  * Graph-level rule: a connection may close a loop only if a Decision or an
- * Approval can end it. Runs for every way an edge appears or moves that the
- * canvas cannot check up front — paste, loading a template, programmatic
- * edits. Connections being drawn are judged live in
+ * Approval can end it. Runs for every way a connection appears or changes its
+ * ends that the canvas cannot check up front — paste, loading a template,
+ * programmatic edits. Connections being drawn are judged live in
  * `linking.validateConnection`, which is what gives the cursor feedback;
  * port-level rules live there too.
  *
- * Only the offending connections are dropped (a reconnected one snaps back),
- * never the whole update: pasting a fragment with one endless loop in it still
- * pastes everything else. `report` puts the refusal on screen, so it does not
- * happen in silence.
+ * Only the offending connections are refused, never the whole update: a new
+ * one is removed, one whose ends were changed keeps its previous ends, and the
+ * rest of the update goes through. `report` puts the refusal on screen, so it
+ * does not happen in silence.
  */
 export function createCycleExitMiddleware(
   report: (message: string) => void,
@@ -28,7 +28,7 @@ export function createCycleExitMiddleware(
     execute: (context, next) => {
       const { helpers, nodesMap, edgesMap, initialEdgesMap } = context;
       // Both ways a connection can close a loop: a new edge, or an existing
-      // one whose ends moved.
+      // one whose ends changed.
       const candidates = new Map<string, Edge>();
       for (const edge of helpers.getAddedEdges()) candidates.set(edge.id, edge);
       for (const id of helpers.getAffectedEdgeIds(['source', 'target'])) {
@@ -55,7 +55,7 @@ export function createCycleExitMiddleware(
 
       report(rejectedMessage(rejected.length));
       const added = rejected.filter((edge) => helpers.checkIfEdgeAdded(edge.id));
-      // A reconnected edge goes back to the ends it had before the update.
+      // An existing connection goes back to the ends it had before the update.
       const restored = rejected
         .filter((edge) => !helpers.checkIfEdgeAdded(edge.id))
         .map((edge) => initialEdgesMap.get(edge.id))

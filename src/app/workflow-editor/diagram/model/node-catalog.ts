@@ -56,7 +56,10 @@ const NOTIFICATION_CHANNELS: readonly SelectOption[] = [
   { value: 'slackMessage', label: 'Slack Message', icon: 'ph-slack-logo' },
 ];
 
-/** Read by the mock backend: the step reports "failed" when it runs. */
+/**
+ * Read by the mock backend: the step reports "failed" when it runs (an Action
+ * with Retry on failure fails once, then succeeds).
+ */
 const SIMULATE_FAILURE: FieldDefinition = {
   kind: 'switch',
   key: 'simulateFailure',
@@ -286,7 +289,7 @@ export const NODE_CATALOG: Record<WorkflowNodeKind, NodeDefinition> = {
   },
 };
 
-/** Palette order: the Workflow Builder demo kinds, plus Approval and Merge for AI patterns. */
+/** Palette order: the Workflow Builder demo order, with Approval and Merge next to Decision. */
 export const PALETTE_ORDER: readonly WorkflowNodeKind[] = [
   WorkflowNodeKind.Trigger,
   WorkflowNodeKind.Action,

@@ -13,7 +13,7 @@ export type { WorkflowTemplate } from './workflow-template';
 /** Query param that deep-links a template (`?template=<id>`). */
 export const TEMPLATE_QUERY_PARAM = 'template';
 
-/** Templates in dialog order; the first one is loaded on start. */
+/** Templates in dialog order; the first one is loaded when the URL names no known template. */
 export const WORKFLOW_TEMPLATES: readonly WorkflowTemplate[] = [
   orderConfirmationTemplate,
   chainingTemplate,
