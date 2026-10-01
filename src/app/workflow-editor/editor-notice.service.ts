@@ -15,7 +15,7 @@ export class EditorNoticeService {
   private timer?: ReturnType<typeof setTimeout>;
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.clear());
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.timer));
   }
 
   /** Show `message`, replacing any notice already on screen. */
@@ -23,10 +23,5 @@ export class EditorNoticeService {
     clearTimeout(this.timer);
     this.message.set(message);
     this.timer = setTimeout(() => this.message.set(null), NOTICE_DURATION);
-  }
-
-  clear(): void {
-    clearTimeout(this.timer);
-    this.message.set(null);
   }
 }
