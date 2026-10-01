@@ -45,7 +45,7 @@ export function createCycleExitMiddleware(
       const accepted = [...edgesMap.values()].filter((edge) => !candidates.has(edge.id));
       const rejected: Edge[] = [];
       for (const edge of candidates.values()) {
-        if (createsCycleWithoutExit(nodesMap, accepted, edge)) rejected.push(edge);
+        if (createsCycleWithoutExit((id) => nodesMap.get(id), accepted, edge)) rejected.push(edge);
         else accepted.push(edge);
       }
       if (rejected.length === 0) {

@@ -142,8 +142,11 @@ export class DiagramComponent {
 
   /** True when connecting `source` to `target` would close a loop nothing can end. */
   private closesEndlessLoop(source: string, target: string): boolean {
-    const nodes = new Map(this.modelService.nodes().map((node) => [node.id, node]));
-    return createsCycleWithoutExit(nodes, this.modelService.edges(), { source, target });
+    return createsCycleWithoutExit(
+      (id) => this.modelService.getNodeById(id),
+      this.modelService.edges(),
+      { source, target },
+    );
   }
 
   /** Right-click on empty canvas → background context menu (paste only). */

@@ -10,16 +10,16 @@ export type Connection = Pick<Edge, 'source' | 'target'>;
  * (reflection loop, review-and-revise). Walks forward from the edge's target
  * without passing through exits and checks whether it gets back to the source.
  *
- * Takes only the ends of the connection, so the rule can judge a connection
- * being drawn (`linking.validateConnection`) as well as one already in a
- * model update (the `cycle-needs-exit` middleware).
+ * Takes a node lookup and only the ends of the connection, so the rule can
+ * judge a connection being drawn (`linking.validateConnection`) as well as one
+ * already in a model update (the `cycle-needs-exit` middleware).
  */
 export function createsCycleWithoutExit(
-  nodes: ReadonlyMap<string, Node>,
+  nodeById: (id: string) => Node | null | undefined,
   edges: Iterable<Connection>,
   edge: Connection,
 ): boolean {
-  const isExit = (id: string) => isLoopExit(nodes.get(id));
+  const isExit = (id: string) => isLoopExit(nodeById(id));
   if (isExit(edge.source) || isExit(edge.target)) return false;
 
   const next = new Map<string, string[]>();

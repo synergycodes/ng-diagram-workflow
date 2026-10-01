@@ -17,36 +17,36 @@ function graph(kinds: Record<string, WorkflowNodeKind>, links: [string, string][
     target,
     data: {},
   }));
-  return { nodes, edges, last: edges[edges.length - 1] };
+  return { nodeById: (id: string) => nodes.get(id), edges, last: edges[edges.length - 1] };
 }
 
 describe('createsCycleWithoutExit', () => {
   it('rejects a loop between agents', () => {
-    const { nodes, edges, last } = graph({ a: AiAgent, b: AiAgent }, [
+    const { nodeById, edges, last } = graph({ a: AiAgent, b: AiAgent }, [
       ['a', 'b'],
       ['b', 'a'],
     ]);
-    expect(createsCycleWithoutExit(nodes, edges, last)).toBe(true);
+    expect(createsCycleWithoutExit(nodeById, edges, last)).toBe(true);
   });
 
   it('accepts the same loop when a Decision or an Approval can end it', () => {
     for (const exit of [Decision, Approval]) {
-      const { nodes, edges, last } = graph({ gen: AiAgent, evaluate: AiAgent, check: exit }, [
+      const { nodeById, edges, last } = graph({ gen: AiAgent, evaluate: AiAgent, check: exit }, [
         ['gen', 'evaluate'],
         ['evaluate', 'check'],
         ['check', 'gen'],
       ]);
-      expect(createsCycleWithoutExit(nodes, edges, last), exit).toBe(false);
+      expect(createsCycleWithoutExit(nodeById, edges, last), exit).toBe(false);
     }
   });
 
   it('rejects a loop that bypasses a Decision elsewhere in the flow', () => {
-    const { nodes, edges, last } = graph({ d: Decision, a: AiAgent, b: AiAgent }, [
+    const { nodeById, edges, last } = graph({ d: Decision, a: AiAgent, b: AiAgent }, [
       ['d', 'a'],
       ['a', 'b'],
       ['b', 'a'],
     ]);
-    expect(createsCycleWithoutExit(nodes, edges, last)).toBe(true);
+    expect(createsCycleWithoutExit(nodeById, edges, last)).toBe(true);
   });
 
   /** Every seed workflow has to survive the rule that runs when it is loaded. */
@@ -55,7 +55,7 @@ describe('createsCycleWithoutExit', () => {
       const nodes = new Map<string, Node>(template.model.nodes.map((node) => [node.id, node]));
       for (const edge of template.model.edges) {
         expect(
-          createsCycleWithoutExit(nodes, template.model.edges, edge),
+          createsCycleWithoutExit((id) => nodes.get(id), template.model.edges, edge),
           `${template.id}: ${edge.id}`,
         ).toBe(false);
       }
@@ -63,12 +63,12 @@ describe('createsCycleWithoutExit', () => {
   });
 
   it('accepts flows without a cycle, including a parallel fan-out and merge', () => {
-    const { nodes, edges, last } = graph({ t: Trigger, a: AiAgent, b: AiAgent, m: Merge }, [
+    const { nodeById, edges, last } = graph({ t: Trigger, a: AiAgent, b: AiAgent, m: Merge }, [
       ['t', 'a'],
       ['t', 'b'],
       ['a', 'm'],
       ['b', 'm'],
     ]);
-    expect(createsCycleWithoutExit(nodes, edges, last)).toBe(false);
+    expect(createsCycleWithoutExit(nodeById, edges, last)).toBe(false);
   });
 });
