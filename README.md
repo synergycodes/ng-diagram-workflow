@@ -2,9 +2,15 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://opensource.org/licenses/MIT)
 
+**Live demo:** [ngdiagram.dev/templates/workflow](https://www.ngdiagram.dev/templates/workflow/)
+
 ![Workflow editor: a nodes library on the left, an order-confirmation workflow on the canvas with a selected decision branching into a notification and a delay, and the decision's branches being edited in the properties panel on the right](docs/assets/demo.png)
 
-Interactive workflow / automation editor built with Angular and [ngDiagram](https://www.ngdiagram.dev/). Drag triggers, actions, delays, decisions, approvals, merges, notifications and AI agents onto a canvas, connect them and edit their settings in a side panel. Use this project as a starting point for building your own low-code flow designer, automation builder or node-based editor. Lean dependencies: Angular, ngDiagram, [Phosphor Icons](https://phosphoricons.com/) (web font) and [html-to-image](https://www.npmjs.com/package/html-to-image) (for JPEG export) — no opinionated third-party UI libraries.
+Interactive workflow / automation editor built with Angular and [ngDiagram](https://www.ngdiagram.dev/). Drag triggers, actions, delays, decisions, approvals, merges, notifications and AI agents onto a canvas, connect them and edit their settings in a side panel. Use this project as a starting point for building your own low-code flow designer, automation builder or node-based editor.
+
+There is no backend: **Run** plays the workflow on an in-browser mock until you plug in your own engine (see [Execution](#execution)). The node types and the bundled workflows are sample data — replace them with your own.
+
+Lean dependencies: Angular, ngDiagram, [Phosphor Icons](https://phosphoricons.com/) (web font) and [html-to-image](https://www.npmjs.com/package/html-to-image) (for JPEG export) — no opinionated third-party UI libraries.
 
 Features:
 
@@ -51,7 +57,9 @@ npm install
 npm start
 ```
 
-Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads: an order-confirmation flow that emails the customer, branches on order value into a sales notification or a delay, then drafts and sends a follow-up with an AI agent (7 nodes, 6 connections). Try dragging a node from the library onto the canvas, wiring it into the flow and editing its settings in the properties panel. **Templates** at the bottom of the Nodes Library swaps in one of the AI pattern workflows; `?template=reflection-loop` (or `chaining`, `routing`, `parallelization`, `human-in-the-loop`) opens one directly. Templates are seed data in [`diagram/templates/`](src/app/workflow-editor/diagram/templates/).
+Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads: an order-confirmation flow that emails the customer, branches on order value into a sales notification or a delay, then drafts and sends a follow-up with an AI agent (7 nodes, 6 connections). Try dragging a node from the library onto the canvas, wiring it into the flow and editing its settings in the properties panel. Then press **Run** in the navbar to watch each step report its status.
+
+**Templates** at the bottom of the Nodes Library swaps in one of the AI pattern workflows. To open one directly, add `?template=<id>` to the URL: `chaining`, `routing`, `parallelization`, `reflection-loop` or `human-in-the-loop`. Templates are seed data in [`diagram/templates/`](src/app/workflow-editor/diagram/templates/).
 
 ## Scripts
 
@@ -66,6 +74,8 @@ Open [http://localhost:4200](http://localhost:4200) — a sample workflow loads:
 | `npm run format:check` | Check formatting without writing  |
 
 ## ngDiagram APIs demonstrated
+
+Paths are relative to `src/app/workflow-editor/`.
 
 | Concern                 | API                                                                                            | Where in this repo                                              |
 | ----------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
@@ -104,7 +114,7 @@ src/
     │   ├── nodes/                    # workflow, decision, ai-agent templates + shared header/icon
     │   └── edges/label-edge/         # labelled edge template
     ├── editor-notice.service.ts      # short navbar messages for what the editor refused to do
-    ├── execution/                    # WorkflowBackend contract, mock backend, run state (+ spec)
+    ├── execution/                    # WorkflowBackend contract, mock backend, run state (+ specs)
     ├── palette-sidebar/              # Nodes Library + draggable tiles
     ├── template-selector/            # starting template + "Select a template" dialog, swaps the model in place
     ├── properties-sidebar/           # panel, Signal Forms for nodes / edges, icon select control
@@ -114,7 +124,7 @@ src/
     └── top-navbar/                   # logo, editable workflow name, run, export, theme toggle
 ```
 
-The ng-diagram `node.type` selects the **template**, which controls the node's layout. `node.data.kind` says **what the node is**. This split lets Trigger, Action, Delay, Notification and Merge share one card template, Decision and Approval share the branching template, and AI Agent gets its own.
+The ngDiagram `node.type` selects the **template**, which controls the node's layout. `node.data.kind` says **what the node is**. This split lets Trigger, Action, Delay, Notification and Merge share one card template, Decision and Approval share the branching template, and AI Agent gets its own.
 
 ### Properties forms
 
@@ -140,8 +150,11 @@ few `--ngd-*` variables that drive the on-canvas look.
   [`workflow-types.ts`](src/app/workflow-editor/diagram/model/workflow-types.ts),
   add a catalog entry (label, icon, `template`, `fields`, `defaults`) and add the
   kind to `PALETTE_ORDER`. The palette tile, node card and properties form pick
-  it up automatically. For a custom layout, create a template component and
-  register it in `nodeTemplateMap` in `diagram.component.ts`.
+  it up automatically. For a custom layout, create a template component, add
+  its key to `WorkflowNodeTemplate` in `workflow-types.ts` and register it in
+  `NODE_TEMPLATE_COMPONENTS` in
+  [`node-templates.ts`](src/app/workflow-editor/diagram/nodes/node-templates.ts).
+  The canvas and the palette preview both read that map.
 - **Icons:** use `ph-<name>` for any [Phosphor](https://phosphoricons.com/) icon.
   For your own single-colour SVGs in `src/assets/`, use `mask:<file>`; the icon
   takes the text colour.
@@ -156,22 +169,29 @@ few `--ngd-*` variables that drive the on-canvas look.
 **Run** (navbar) sends the same `ng-diagram-workflow` document the JSON export
 produces to a `WorkflowBackend` and folds the `RunEvent`s it streams back
 (`node` status, `edge` travelled, `finished`) into signals the node and edge
-templates read. The page provides
+templates read.
+
+The page provides
 [`MockWorkflowBackend`](src/app/workflow-editor/execution/mock-backend.ts),
-which walks the graph with timers: parallel branches run at once, a Merge
-waits for all branches or the first one, a Decision loops back once and then
-goes forward, an Approval waits for a click on one of its branches, and
-**Simulate failure** fails a step (an Action with **Retry on failure** fails
-once, then succeeds). To connect a real engine, provide another
-`WorkflowBackend` in `workflow-editor-page.component.ts`.
+which walks the graph with timers:
+
+- parallel branches run at once
+- a Merge waits for all branches or the first one
+- a Decision loops back once and then goes forward
+- an Approval waits for a click on one of its branches
+- **Simulate failure** fails a step (an Action with **Retry on failure** fails
+  once, then succeeds)
+
+To connect a real engine, provide another `WorkflowBackend` in
+`workflow-editor-page.component.ts`.
 
 ## Export format
 
 [`export.service.ts`](src/app/workflow-editor/export/export.service.ts) offers
 two formats: a **JPEG** raster snapshot of the canvas and **JSON**. The JSON is
 an `ng-diagram-workflow` document — a `nodes` array (id, kind, position, label,
-description, properties, and branches for decisions) plus a `connections` array
-(port-to-port, with optional labels).
+description, properties, and branches for Decision and Approval nodes) plus a
+`connections` array (port-to-port, with optional labels).
 
 ## Known limitations / notes
 
@@ -183,22 +203,23 @@ This template is a demo of the editor UI, not a workflow engine. It does not inc
 - auto-layout
 - real workflow execution — runs are simulated in the browser by `MockWorkflowBackend`
 
-## Workflow Builder
-
-Need more than an editor UI? [Workflow Builder](https://www.workflowbuilder.io/) is a complete workflow solution by Synergy Codes, including backend integration for storing and executing workflows. Visit [workflowbuilder.io](https://www.workflowbuilder.io/) to learn more.
-
 ## Tech stack
 
 - [Angular 22](https://angular.dev) (standalone components, signals, zoneless, Signal Forms)
 - **ngDiagram** ([`ng-diagram`](https://www.npmjs.com/package/ng-diagram) on npm)
 - [Phosphor Icons](https://phosphoricons.com/) (web font)
 - [html-to-image](https://www.npmjs.com/package/html-to-image) (JPEG export)
-- Plain CSS with a custom design-token system (no UI framework)
+- SCSS component styles and CSS custom-property design tokens (no UI framework)
 - Poppins
 - Vitest, ESLint, Prettier
 
+## Workflow Builder
+
+This template is the editor UI only. [Workflow Builder](https://www.workflowbuilder.io/) by Synergy Codes is an open-source React SDK for visual workflow editors that also ships a reference back-end and an execution engine.
+
 ## Support
 
+- **Issues**: [GitHub Issues](https://github.com/synergycodes/ng-diagram-workflow/issues)
 - **ngDiagram Discussions**: [GitHub Discussions](https://github.com/synergycodes/ng-diagram/discussions), [Discord](https://discord.gg/FDMjRuarFb)
 - **ngDiagram Documentation**: [ngdiagram.dev/docs](https://www.ngdiagram.dev/docs)
 
